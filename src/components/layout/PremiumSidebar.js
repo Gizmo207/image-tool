@@ -49,44 +49,58 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     setIsProcessing(true);
     try {
       const resizedDataUrl = await imageProcessor.resize(originalImage, width, height);
-      if (resizedDataUrl) {
-        setProcessedImage(resizedDataUrl);
-      }
+      setProcessedImage(resizedDataUrl);
     } catch (error) {
-      console.error('Error resizing image:', error);
-      alert('Error resizing image: ' + error.message);
-    } finally {
-      setIsProcessing(false);
+      console.error('Resize failed:', error);
+      alert('Failed to resize image. Please try again.');
     }
+    setIsProcessing(false);
   };
 
-  const socialPresets = [
-    { name: "Instagram Square", width: 1080, height: 1080, icon: "📷" },
-    { name: "Discord Avatar", width: 512, height: 512, icon: "🎮" },
-    { name: "YouTube Thumbnail", width: 1280, height: 720, icon: "📺" },
-    { name: "Twitter Header", width: 1500, height: 500, icon: "🐦" },
-    { name: "Facebook Cover", width: 1200, height: 630, icon: "📘" },
-    { name: "LinkedIn Banner", width: 1584, height: 396, icon: "💼" }
-  ];
+  const handleFilter = async (filterType) => {
+    if (!originalImage) return;
+    
+    setIsProcessing(true);
+    try {
+      const filteredDataUrl = await imageProcessor.filter(originalImage, filterType);
+      setProcessedImage(filteredDataUrl);
+    } catch (error) {
+      console.error('Filter failed:', error);
+      alert('Failed to apply filter. Please try again.');
+    }
+    setIsProcessing(false);
+  };
+
+  const handleFormat = async (format) => {
+    if (!originalImage) return;
+    
+    setIsProcessing(true);
+    try {
+      const convertedDataUrl = await imageProcessor.convert(originalImage, format);
+      setProcessedImage(convertedDataUrl);
+    } catch (error) {
+      console.error('Format conversion failed:', error);
+      alert('Failed to convert format. Please try again.');
+    }
+    setIsProcessing(false);
+  };
 
   return (
     <div className="premium-sidebar">
       <div className="sidebar-content">
-        {/* App Header */}
-        <div className="app-header">
-          <h1 className="app-title">Image Editor Pro</h1>
-          <p className="app-subtitle">Professional Image Processing Suite</p>
-          {hasProLicense && <div className="pro-badge">✨ PRO</div>}
-        </div>
+        <header className="app-header">
+          <h1 className="app-title">Image Editor</h1>
+          <p className="app-subtitle">Professional Image Processing</p>
+          {hasProLicense && <div className="pro-badge">PRO</div>}
+        </header>
 
-        {/* Upload Section */}
-        <div className="upload-section">
+        <section className="upload-section">
           <h2 className="section-title">
             <span className="status-dot upload"></span>
-            📁 Upload Image
+            Upload Image
           </h2>
           
-          <div 
+          <div
             className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -102,22 +116,10 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
             </div>
             
             {!originalImage && (
-              <div className="tools-preview">
-                <p className="preview-title">� Step 1: Upload an image above ☝️</p>
-                <div className="step-indicator">
-                  <span className="step current">1️⃣ Upload Image</span>
-                  <span className="step-arrow">→</span>
-                  <span className="step next">2️⃣ Choose Tool</span>
-                  <span className="step-arrow">→</span>
-                  <span className="step next">3️⃣ Process & Download</span>
-                </div>
-                <p className="preview-subtitle">🔧 Tools that will unlock:</p>
-                <div className="preview-tools">
-                  <span className="preview-tool">📷 Social Media Resize</span>
-                  <span className="preview-tool">✂️ AI Background Removal</span>
-                  <span className="preview-tool">🔄 Format Converter</span>
-                  <span className="preview-tool">🎨 Premium Filters</span>
-                </div>
+              <div className="step-indicator">
+                <span className="step current">1️⃣ Upload Image</span>
+                <span className="step next">2️⃣ Choose Tool</span>
+                <span className="step next">3️⃣ Process & Download</span>
               </div>
             )}
             
@@ -132,135 +134,115 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
 
           {originalImage && (
             <div className="image-info">
-              <span className="info-label">📏 Original:</span>
+              <span className="info-label">Size:</span>
               <span className="info-value">{originalImage.width} × {originalImage.height}px</span>
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Tools Container */}
         {originalImage && (
           <div className="tools-container">
-            
-            {/* Resize Tool */}
             <div className="tool-card">
               <div className="tool-header">
-                <div className="tool-icon">🔧</div>
+                <div className="tool-icon">📷</div>
                 <div className="tool-info">
-                  <h3>Smart Resize</h3>
-                  <p>Resize images with social media presets and custom dimensions</p>
-                </div>
-              </div>
-
-              <div className="preset-grid">
-                {socialPresets.map((preset, index) => (
-                  <button
-                    key={index}
-                    className="preset-btn"
-                    onClick={() => handleResize(preset.width, preset.height)}
-                    title={`${preset.width} × ${preset.height}px`}
-                  >
-                    <span className="preset-icon">{preset.icon}</span>
-                    <span className="preset-name">{preset.name}</span>
-                    <span className="preset-size">{preset.width}×{preset.height}</span>
-                  </button>
-                ))}
-              </div>
-
-              <button className="tool-button" onClick={() => setActiveTab('resize-custom')}>
-                ✏️ Custom Dimensions
-              </button>
-            </div>
-
-            {/* Background Remover Tool */}
-            <div className="tool-card">
-              <div className="tool-header">
-                <div className="tool-icon">✂️</div>
-                <div className="tool-info">
-                  <h3>AI Background Remover</h3>
-                  <p>Remove backgrounds with professional AI processing</p>
+                  <h3>Social Media Resize</h3>
+                  <p>Perfect sizes for Instagram, Facebook, Twitter and more</p>
                 </div>
               </div>
               
-              <button 
-                className="tool-button"
-                onClick={() => alert('Background removal feature - integrate with your existing BackgroundRemover component')}
-              >
-                🎭 Remove Background
-              </button>
+              <div className="preset-grid">
+                <button className="preset-btn" onClick={() => handleResize(1080, 1080)}>
+                  <span className="preset-icon">📱</span>
+                  <span className="preset-name">Instagram</span>
+                  <span className="preset-size">1080×1080</span>
+                </button>
+                <button className="preset-btn" onClick={() => handleResize(1200, 630)}>
+                  <span className="preset-icon">📘</span>
+                  <span className="preset-name">Facebook</span>
+                  <span className="preset-size">1200×630</span>
+                </button>
+                <button className="preset-btn" onClick={() => handleResize(1024, 512)}>
+                  <span className="preset-icon">🐦</span>
+                  <span className="preset-name">Twitter</span>
+                  <span className="preset-size">1024×512</span>
+                </button>
+                <button className="preset-btn" onClick={() => handleResize(1080, 1920)}>
+                  <span className="preset-icon">📱</span>
+                  <span className="preset-name">Story</span>
+                  <span className="preset-size">1080×1920</span>
+                </button>
+              </div>
             </div>
 
-            {/* Format Converter Tool */}
             <div className="tool-card">
               <div className="tool-header">
                 <div className="tool-icon">🔄</div>
                 <div className="tool-info">
                   <h3>Format Converter</h3>
-                  <p>Convert between JPG, PNG, WebP, and other formats</p>
+                  <p>Convert between JPG, PNG, WebP formats</p>
                 </div>
               </div>
               
               <div className="format-buttons">
-                <button className="format-btn" onClick={() => alert('Convert to JPG')}>JPG</button>
-                <button className="format-btn" onClick={() => alert('Convert to PNG')}>PNG</button>
-                <button className="format-btn" onClick={() => alert('Convert to WebP')}>WebP</button>
-                <button className="format-btn" onClick={() => alert('Convert to GIF')}>GIF</button>
+                <button className="format-btn" onClick={() => handleFormat('png')}>PNG</button>
+                <button className="format-btn" onClick={() => handleFormat('jpg')}>JPG</button>
+                <button className="format-btn" onClick={() => handleFormat('webp')}>WebP</button>
+                <button className="format-btn" onClick={() => handleFormat('gif')}>GIF</button>
               </div>
             </div>
 
-            {/* Filters Tool */}
             <div className="tool-card">
               <div className="tool-header">
                 <div className="tool-icon">🎨</div>
                 <div className="tool-info">
                   <h3>Premium Filters</h3>
-                  <p>Professional photo filters and adjustments</p>
+                  <p>Professional photo effects and enhancements</p>
                 </div>
               </div>
               
-              <button 
-                className="tool-button"
-                onClick={() => alert('Filters feature - integrate with your existing FilterControls component')}
-              >
-                ✨ Apply Filters
+              <button className="tool-button" onClick={() => handleFilter('blur')}>
+                Blur Effect
               </button>
             </div>
 
-            {/* Batch Processing Tool */}
             <div className="tool-card">
               <div className="tool-header">
-                <div className="tool-icon">⚡</div>
+                <div className="tool-icon">✂️</div>
                 <div className="tool-info">
-                  <h3>Batch Processing</h3>
-                  <p>Process multiple images simultaneously</p>
+                  <h3>AI Background Removal</h3>
+                  <p>Automatically remove backgrounds with AI</p>
                 </div>
               </div>
               
-              <button 
-                className="tool-button"
-                disabled={!hasProLicense}
-                onClick={() => alert('Batch processing - PRO feature')}
-              >
-                {hasProLicense ? '🔥 Batch Process' : '🔒 Upgrade to Pro'}
+              <button className="tool-button" onClick={() => handleFilter('remove-bg')}>
+                Remove Background
               </button>
             </div>
 
-          </div>
-        )}
-
-        {/* Pro Upgrade Section */}
-        {!hasProLicense && (
-          <div className="upgrade-section">
-            <div className="upgrade-card">
-              <h3>🚀 Upgrade to Pro</h3>
-              <p>Unlock unlimited processing, batch operations, and premium filters</p>
-              <button className="upgrade-button">
-                ✨ Get Pro - $40
+            <div className="tool-card">
+              <div className="tool-header">
+                <div className="tool-icon">🔧</div>
+                <div className="tool-info">
+                  <h3>Quick Tools</h3>
+                  <p>Essential image editing functions</p>
+                </div>
+              </div>
+              
+              <button className="tool-button" onClick={() => handleFilter('grayscale')}>
+                Grayscale
               </button>
             </div>
           </div>
         )}
 
+        <section className="upgrade-section">
+          <div className="upgrade-card">
+            <h3>Unlock Premium Features</h3>
+            <p>Get access to advanced AI tools, unlimited exports, and premium filters</p>
+            <button className="upgrade-button">Upgrade to Pro</button>
+          </div>
+        </section>
       </div>
     </div>
   );
