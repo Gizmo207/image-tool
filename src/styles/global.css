@@ -11,9 +11,9 @@
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
-  min-height: 100vh;
+  height: 100vh; /* Fixed height instead of min-height */
   color: #ffffff;
-  overflow-x: hidden;
+  overflow: hidden; /* Completely prevent scrolling on body */
 }
 
 /* Smooth scrolling */
@@ -22,17 +22,20 @@ html {
 }
 
 #root {
-  min-height: 100vh;
+  height: 100vh; /* Fixed height instead of min-height */
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Prevent root from scrolling */
 }
 
 /* Premium Layout */
 .app {
   display: flex;
-  min-height: 100vh;
+  flex-direction: column; /* Stack header, main, footer vertically */
+  height: 100vh; /* Fixed height instead of min-height */
   background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
   color: #ffffff;
+  overflow: hidden; /* Prevent app from scrolling */
 }
 
 .main-content {
@@ -44,7 +47,7 @@ html {
 
 .editor-area {
   flex: 1;
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%); /* Match site gradient instead of white */
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   -webkit-backdrop-filter: blur(10px);
