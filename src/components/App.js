@@ -12,6 +12,7 @@ function App() {
   const [originalImage, setOriginalImage] = useState(null);
   const [processedImage, setProcessedImage] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processedFormat, setProcessedFormat] = useState('png'); // Track the format of processed image
   const [hasProLicense] = useState(LicenseManager.checkLicense());
 
   // Debug wrapper for setProcessedImage
@@ -45,6 +46,8 @@ function App() {
           originalImage={originalImage}
           setProcessedImage={handleSetProcessedImage}
           setIsProcessing={setIsProcessing}
+          isProcessing={isProcessing}
+          setProcessedFormat={setProcessedFormat}
           hasProLicense={hasProLicense}
         />
         
@@ -53,6 +56,7 @@ function App() {
             originalImage={originalImage}
             processedImage={processedImage}
             isProcessing={isProcessing}
+            processedFormat={processedFormat}
             hasProLicense={hasProLicense}
           />
         </div>

@@ -2,14 +2,39 @@
 export const downloadManager = {
   // Download canvas as file
   downloadCanvas(canvas, filename = 'image.png', quality = 0.95) {
+    // Determine format from filename extension
+    const format = this.getFormatFromFilename(filename);
+    const mimeType = this.getMimeType(format);
+    
     const link = document.createElement('a');
     link.download = filename;
-    link.href = canvas.toDataURL('image/png', quality);
+    link.href = canvas.toDataURL(mimeType, quality);
     
     // Trigger download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  },
+
+  // Get format from filename
+  getFormatFromFilename(filename) {
+    const extension = filename.split('.').pop().toLowerCase();
+    return extension;
+  },
+
+  // Get MIME type from format
+  getMimeType(format) {
+    switch (format) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'image/png';
+    }
   },
 
   // Download image element as file

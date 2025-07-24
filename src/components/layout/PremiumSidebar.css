@@ -455,24 +455,22 @@
     bottom: -4px;
     background: linear-gradient(
         45deg,
-        rgba(0, 255, 255, 0.9),
-        rgba(255, 0, 255, 0.9),
-        rgba(0, 255, 255, 0.9),
-        rgba(255, 0, 255, 0.9),
-        rgba(0, 255, 255, 0.9)
+        rgba(0, 255, 255, 0.4), /* Slightly brighter */
+        rgba(255, 0, 255, 0.4), /* Slightly brighter */
+        rgba(0, 255, 255, 0.4), /* Slightly brighter */
+        rgba(255, 0, 255, 0.4), /* Slightly brighter */
+        rgba(0, 255, 255, 0.4)  /* Slightly brighter */
     );
     background-size: 200% 200%;
     animation: gradientShift 5s ease infinite;
     border-radius: 24px;
     z-index: -1;
-    opacity: 1;
-    filter: blur(1px);
+    opacity: 0.5; /* Increased from 0.4 to 0.5 */
 }
 
 .tool-card:hover::before {
-    opacity: 1;
+    opacity: 0.7; /* Increased from 0.6 to 0.7 */
     animation-duration: 2.5s;
-    filter: blur(0.5px);
 }
 
 .tool-card:hover {
@@ -507,16 +505,20 @@
 }
 
 .tool-info h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 6px; /* Increased from 4px */
-    line-height: 1.3; /* Better line height */
+    font-size: 1.2rem !important; /* Bigger */
+    font-weight: 700 !important; /* Bolder */
+    margin-bottom: 6px; 
+    line-height: 1.3; 
+    color: #ffffff !important; /* Pure white */
+    text-shadow: 0 0 10px rgba(64, 224, 255, 0.8) !important; /* Cyan glow */
 }
 
 .tool-info p {
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.5; /* Increased from 1.4 for better readability */
+    font-size: 1rem !important; /* Much bigger */
+    color: #40e0ff !important; /* Bright cyan */
+    line-height: 1.5; 
+    font-weight: 600 !important; /* Bolder */
+    text-shadow: 0 0 8px rgba(64, 224, 255, 0.6) !important; /* Cyan glow */
 }
 
 /* Preset Grid */
@@ -545,24 +547,24 @@
 }
 
 .preset-btn:hover {
-    background: rgba(64, 224, 255, 0.25);
-    border-color: #40e0ff;
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 8px 20px rgba(64, 224, 255, 0.25);
+    background: rgba(64, 224, 255, 0.15) !important; /* Subtle background, no glow */
+    border-color: rgba(64, 224, 255, 0.4) !important; /* Subtle border */
+    transform: none !important; /* NO MOVEMENT - COMPLETELY STATIC */
+    box-shadow: none !important; /* NO GLOW AT ALL */
 }
 
 .preset-btn:hover .preset-name {
-    text-shadow: none !important;       /* 🔥 remove all blur */
-    color: #ffffff !important;          /* ensure bright white text */
-    transform: scale(1.05);             /* slight scale-up instead of glow */
-    font-weight: 800;                   /* sharper and bolder */
-    letter-spacing: 0.2px;              /* slight clarity boost */
+    transform: none !important; 
+    color: #ffffff !important;
+    text-shadow: none !important; /* NO GLOW ON HOVER - CRISP TEXT */
+    font-weight: 900 !important; 
 }
 
 .preset-btn:hover .preset-size {
-    text-shadow: none !important;       /* 🔥 remove all blur */
-    transform: scale(1.05);             /* slight scale-up instead of glow */
-    color: #40e0ff;
+    transform: none !important; 
+    color: #40e0ff !important;
+    text-shadow: none !important; /* NO GLOW ON HOVER - CRISP TEXT */
+    font-weight: 800 !important; 
 }
 
 .preset-icon {
@@ -571,18 +573,18 @@
 }
 
 .preset-name {
-    font-weight: 700; 
-    font-size: 1.1rem; /* Resized to be large but not huge */
-    color: #ffffff;
-    text-shadow: none;
+    font-weight: 800 !important; 
+    font-size: 1.2rem !important; /* Much bigger */
+    color: #ffffff !important;
+    text-shadow: 0 0 10px rgba(64, 224, 255, 0.8) !important; /* Cyan glow */
     transition: all 0.2s ease-in-out;
 }
 
 .preset-size {
-    font-size: 0.9rem; /* Resized to be large but not huge */
-    color: #a0e0ff; 
-    font-weight: 600; 
-    text-shadow: none; 
+    font-size: 1rem !important; /* Much bigger */
+    color: #40e0ff !important; /* Bright cyan */
+    font-weight: 700 !important; /* Much bolder */
+    text-shadow: 0 0 8px rgba(64, 224, 255, 0.6) !important; /* Cyan glow */
     transition: all 0.2s ease-in-out;
 }
 
@@ -619,21 +621,23 @@
 
 .input-group label {
     display: block;
-    font-size: 0.9rem; /* Bigger */
-    color: #cddcff; /* Brighter, more visible blue-white */
-    margin-bottom: 6px; /* More space */
-    font-weight: 600; /* Bolder */
+    font-size: 1rem !important; /* Much bigger */
+    color: #40e0ff !important; /* Bright cyan glow */
+    margin-bottom: 6px; 
+    font-weight: 700 !important; /* Much bolder */
+    text-shadow: 0 0 8px rgba(64, 224, 255, 0.8) !important; /* Cyan glow */
 }
 
 .input-group input {
     width: 100%;
-    padding: 10px 28px 10px 12px; /* More padding */
+    padding: 12px 30px 12px 15px; /* Bigger padding */
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px; /* Smoother corners */
-    color: #ffffff; /* Pure white for input text */
-    font-size: 1rem; /* Bigger */
-    font-weight: 500;
+    border: 1px solid rgba(64, 224, 255, 0.4) !important; /* Cyan border */
+    border-radius: 8px; 
+    color: #ffffff !important; /* Pure white for input text */
+    font-size: 1.2rem !important; /* Much bigger text */
+    font-weight: 600 !important; /* Bolder */
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.6) !important; /* White glow */
     transition: all 0.3s ease;
     box-sizing: border-box;
 }
@@ -743,6 +747,98 @@
     transform: translateY(-1px);
 }
 
+.format-btn.selected {
+    background: rgba(255, 64, 255, 0.3);
+    border-color: rgba(255, 64, 255, 0.8);
+    box-shadow: 0 0 15px rgba(255, 64, 255, 0.5);
+    color: #ff40ff;
+    text-shadow: 0 0 10px rgba(255, 64, 255, 0.8);
+    font-weight: 700;
+}
+
+.format-btn.selected:hover {
+    background: rgba(255, 64, 255, 0.4);
+    border-color: #ff40ff;
+    box-shadow: 0 0 20px rgba(255, 64, 255, 0.7);
+}
+
+/* Success Notification */
+.success-notification {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    margin-top: 12px;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 255, 0.15));
+    border: 2px solid rgba(0, 255, 136, 0.5);
+    border-radius: 12px;
+    animation: successSlideIn 0.8s ease-out;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.success-notification::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 136, 0.2),
+        transparent
+    );
+    animation: successShimmer 2s ease-in-out;
+}
+
+.success-icon {
+    font-size: 1.4rem;
+    animation: successBounce 0.8s ease-out;
+}
+
+.success-message {
+    color: #00ff88;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-shadow: 0 0 12px rgba(0, 255, 136, 0.8);
+    flex: 1;
+    line-height: 1.3;
+}
+
+@keyframes successSlideIn {
+    0% {
+        transform: translateY(-20px) scale(0.9);
+        opacity: 0;
+        box-shadow: 0 0 0 rgba(0, 255, 136, 0.5);
+    }
+    60% {
+        transform: translateY(0) scale(1.05);
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+    }
+}
+
+@keyframes successShimmer {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+
+@keyframes successBounce {
+    0% { transform: scale(0.3) rotate(-180deg); }
+    40% { transform: scale(1.3) rotate(-10deg); }
+    60% { transform: scale(0.9) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
 /* Premium Buttons */
 .tool-button {
     width: 100%;
@@ -795,6 +891,36 @@
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+}
+
+.tool-button.processing {
+    background: linear-gradient(135deg, #40e0ff, #ff40ff);
+    animation: processingPulse 1.5s ease-in-out infinite;
+    cursor: wait;
+}
+
+.tool-button.ready {
+    animation: readyGlow 2s ease-in-out infinite;
+}
+
+@keyframes processingPulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(64, 224, 255, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(255, 64, 255, 0.6);
+        transform: scale(1.02);
+    }
+}
+
+@keyframes readyGlow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(64, 224, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(255, 64, 255, 0.5);
+    }
 }
 
 /* Upgrade Section */

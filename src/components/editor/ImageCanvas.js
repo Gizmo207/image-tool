@@ -3,13 +3,14 @@ import Loading from '../ui/Loading';
 import Button from '../ui/Button';
 import { downloadManager } from '../../utils/downloadManager';
 
-function ImageCanvas({ originalImage, processedImage, isProcessing, hasProLicense }) {
+const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFormat = 'png', hasProLicense }) => {
   console.log('🖼️ ImageCanvas render:', { 
     hasOriginal: !!originalImage, 
     hasProcessed: !!processedImage, 
     isProcessing,
     processedType: typeof processedImage 
   });
+  
   const handleDownload = () => {
     if (processedImage) {
       const tempImg = new Image();
@@ -28,7 +29,9 @@ function ImageCanvas({ originalImage, processedImage, isProcessing, hasProLicens
           ctx.fillText('Image Editor Pro', 10, canvas.height - 10);
         }
 
-        downloadManager.downloadCanvas(canvas, 'edited-image.png');
+        // Generate filename with correct extension
+        const filename = `edited-image.${processedFormat}`;
+        downloadManager.downloadCanvas(canvas, filename);
       };
       tempImg.src = processedImage;
     }
@@ -81,6 +84,6 @@ function ImageCanvas({ originalImage, processedImage, isProcessing, hasProLicens
       )}
     </div>
   );
-}
+};
 
 export default ImageCanvas;

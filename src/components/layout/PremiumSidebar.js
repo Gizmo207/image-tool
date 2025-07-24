@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { imageProcessor } from '../../utils/imageProcessor';
 import './PremiumSidebar.css';
 
-const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIsProcessing, hasProLicense }) => {
+const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIsProcessing, isProcessing, setProcessedFormat, hasProLicense }) => {
   console.log('🎨 PremiumSidebar render:', { 
     hasOriginalImage: !!originalImage, 
     originalImageDimensions: originalImage ? `${originalImage.width}x${originalImage.height}` : 'none',
@@ -14,6 +14,9 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const [activeTab, setActiveTab] = useState('upload');
   const [customWidth, setCustomWidth] = useState('');
   const [customHeight, setCustomHeight] = useState('');
+  const [selectedFormat, setSelectedFormat] = useState('');
+  const [conversionSuccess, setConversionSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const fileInputRef = useRef(null);
 
   // Update custom dimensions when image changes
@@ -64,6 +67,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     try {
       const resizedDataUrl = await imageProcessor.resize(originalImage, width, height);
       setProcessedImage(resizedDataUrl);
+      setProcessedFormat('png'); // Reset to PNG after resize
     } catch (error) {
       console.error('Resize failed:', error);
       alert('Failed to resize image. Please try again.');
@@ -82,6 +86,37 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     }
   };
 
+  const handleFormatSelect = (format) => {
+    setSelectedFormat(format);
+  };
+
+  const handleFormatConvert = async () => {
+    if (!originalImage || !selectedFormat) return;
+    
+    setIsProcessing(true);
+    setConversionSuccess(false);
+    try {
+      const convertedDataUrl = await imageProcessor.convert(originalImage, selectedFormat);
+      setProcessedImage(convertedDataUrl);
+      setProcessedFormat(selectedFormat); // Update the format state
+      
+      // Show success feedback
+      setConversionSuccess(true);
+      setSuccessMessage(`✨ Successfully converted to ${selectedFormat.toUpperCase()}! Your image is ready to download. 📥`);
+      
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => {
+        setConversionSuccess(false);
+        setSuccessMessage('');
+      }, 5000);
+      
+    } catch (error) {
+      console.error('Format conversion failed:', error);
+      alert('Failed to convert format. Please try again.');
+    }
+    setIsProcessing(false);
+  };
+
   const handleFilter = async (filterType) => {
     if (!originalImage) return;
     
@@ -89,6 +124,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     try {
       const filteredDataUrl = await imageProcessor.filter(originalImage, filterType);
       setProcessedImage(filteredDataUrl);
+      setProcessedFormat('png'); // Reset to PNG after filter
     } catch (error) {
       console.error('Filter failed:', error);
       alert('Failed to apply filter. Please try again.');
@@ -103,6 +139,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     try {
       const convertedDataUrl = await imageProcessor.convert(originalImage, format);
       setProcessedImage(convertedDataUrl);
+      setProcessedFormat(format); // Update format
     } catch (error) {
       console.error('Format conversion failed:', error);
       alert('Failed to convert format. Please try again.');
@@ -256,11 +293,50 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
               </div>
               
               <div className="format-buttons">
-                <button className="format-btn" onClick={() => handleFormat('png')}>PNG</button>
-                <button className="format-btn" onClick={() => handleFormat('jpg')}>JPG</button>
-                <button className="format-btn" onClick={() => handleFormat('webp')}>WebP</button>
-                <button className="format-btn" onClick={() => handleFormat('gif')}>GIF</button>
+                <button 
+                  className={`format-btn ${selectedFormat === 'png' ? 'selected' : ''}`}
+                  onClick={() => handleFormatSelect('png')}
+                >
+                  PNG
+                </button>
+                <button 
+                  className={`format-btn ${selectedFormat === 'jpg' ? 'selected' : ''}`}
+                  onClick={() => handleFormatSelect('jpg')}
+                >
+                  JPG
+                </button>
+                <button 
+                  className={`format-btn ${selectedFormat === 'webp' ? 'selected' : ''}`}
+                  onClick={() => handleFormatSelect('webp')}
+                >
+                  WebP
+                </button>
+                <button 
+                  className={`format-btn ${selectedFormat === 'gif' ? 'selected' : ''}`}
+                  onClick={() => handleFormatSelect('gif')}
+                >
+                  GIF
+                </button>
               </div>
+              
+              <button 
+                className={`tool-button ${isProcessing ? 'processing' : ''} ${selectedFormat && !isProcessing ? 'ready' : ''}`}
+                onClick={handleFormatConvert}
+                disabled={!selectedFormat || !originalImage || isProcessing}
+              >
+                {isProcessing ? (
+                  <>🔄 Converting...</>
+                ) : (
+                  <>🔄 Convert to {selectedFormat ? selectedFormat.toUpperCase() : 'Format'}</>
+                )}
+              </button>
+              
+              {conversionSuccess && (
+                <div className="success-notification">
+                  <div className="success-icon">✅</div>
+                  <div className="success-message">{successMessage}</div>
+                </div>
+              )}
             </div>
 
             <div className="tool-card">
