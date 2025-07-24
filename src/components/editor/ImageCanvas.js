@@ -47,19 +47,7 @@ function ImageCanvas({ originalImage, processedImage, isProcessing, hasProLicens
             {isProcessing ? (
               <Loading text="Processing your image..." />
             ) : processedImage ? (
-              <>
-                <img src={processedImage.src} alt="Processed" />
-                <div className="download-controls">
-                  <Button onClick={handleDownload} variant="success">
-                    💾 Download Image
-                  </Button>
-                  {!hasProLicense && (
-                    <p className="watermark-notice">
-                      Free version includes watermark
-                    </p>
-                  )}
-                </div>
-              </>
+              <img src={processedImage.src} alt="Processed" />
             ) : (
               <div className="empty-state">
                 <p>Processed image will appear here</p>
@@ -68,6 +56,20 @@ function ImageCanvas({ originalImage, processedImage, isProcessing, hasProLicens
           </div>
         </div>
       </div>
+
+      {/* Download controls moved outside and below the grid */}
+      {processedImage && !isProcessing && (
+        <div className="download-section">
+          <Button onClick={handleDownload} variant="success">
+            💾 Download Image
+          </Button>
+          {!hasProLicense && (
+            <p className="watermark-notice">
+              Free version includes watermark
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -9,10 +9,16 @@
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["image-editor", "resize", "background-removal", "photo-editing"],
+  "keywords": [
+    "image-editor",
+    "resize",
+    "background-removal",
+    "photo-editing"
+  ],
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.45.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

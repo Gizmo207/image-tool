@@ -191,6 +191,20 @@
   object-fit: contain;
 }
 
+/* Download section - moved outside the grid */
+.download-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  text-align: center;
+  border: 2px solid #e9ecef;
+}
+
+.download-section .btn {
+  margin-bottom: 10px;
+}
+
 .download-controls {
   margin-top: 15px;
   text-align: center;
