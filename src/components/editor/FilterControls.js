@@ -7,17 +7,25 @@ function FilterControls({ originalImage, setProcessedImage, hasProLicense }) {
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [saturation, setSaturation] = useState(100);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const applyFilters = () => {
+  const applyFilters = async () => {
     if (!originalImage) return;
 
-    const filteredImage = imageProcessor.applyFilters(originalImage, {
-      brightness: brightness / 100,
-      contrast: contrast / 100,
-      saturation: saturation / 100,
-    });
-    
-    setProcessedImage(filteredImage);
+    setIsProcessing(true);
+    try {
+      const filteredImage = await imageProcessor.applyFilters(originalImage, {
+        brightness: brightness / 100,
+        contrast: contrast / 100,
+        saturation: saturation / 100,
+      });
+      
+      setProcessedImage(filteredImage);
+    } catch (error) {
+      alert('Error applying filters: ' + error.message);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const resetFilters = () => {
@@ -81,11 +89,19 @@ function FilterControls({ originalImage, setProcessedImage, hasProLicense }) {
       </div>
 
       <div className="filter-buttons">
-        <Button onClick={applyFilters} variant="primary">
-          ✨ Apply Filters
+        <Button 
+          onClick={applyFilters} 
+          variant="primary"
+          disabled={isProcessing || !originalImage}
+        >
+          {isProcessing ? '✨ Applying...' : '✨ Apply Filters'}
         </Button>
         
-        <Button onClick={resetFilters} variant="secondary">
+        <Button 
+          onClick={resetFilters} 
+          variant="secondary"
+          disabled={isProcessing}
+        >
           🔄 Reset
         </Button>
       </div>

@@ -3,8 +3,8 @@
 /* Header */
 .header {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding: 15px 0;
 }
@@ -147,14 +147,15 @@
 /* Image Canvas */
 .image-canvas {
   height: 100%;
+  overflow: hidden; /* Prevent scrolling within the canvas area */
 }
 
 .canvas-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  height: 100%;
-  min-height: 500px;
+  height: 600px; /* Fixed height instead of 100% */
+  max-height: 600px; /* Ensure it doesn't grow beyond this */
 }
 
 .canvas-panel {
@@ -181,11 +182,14 @@
   border-radius: 8px;
   overflow: hidden;
   position: relative;
+  max-height: 450px; /* Constrain the preview container */
 }
 
 .image-preview img {
   max-width: 100%;
   max-height: 100%;
+  height: auto;
+  width: auto;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   object-fit: contain;
@@ -331,7 +335,12 @@
   
   .canvas-grid {
     grid-template-columns: 1fr;
-    min-height: auto;
+    height: auto; /* Allow natural height on mobile */
+    max-height: none; /* Remove height constraint on mobile */
+  }
+  
+  .image-preview {
+    max-height: 300px; /* Smaller constraint on mobile */
   }
   
   .filter-buttons {
@@ -341,4 +350,51 @@
   .preset-buttons {
     justify-content: center;
   }
+}
+
+/* Resize Controls */
+.resize-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.current-dimensions {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.dimension-info {
+  margin: 0;
+  font-size: 14px;
+  color: #495057;
+  font-weight: 600;
+}
+
+.resize-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.resize-buttons .btn {
+  flex: 1;
+  min-width: 140px;
+}
+
+.dimension-preview {
+  background: #e7f3ff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #b8daff;
+}
+
+.preview-info {
+  margin: 0;
+  font-size: 14px;
+  color: #004085;
+  font-weight: 600;
+  text-align: center;
 }

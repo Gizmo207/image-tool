@@ -4,25 +4,24 @@ import { canvasHelpers } from './canvasHelpers';
 export const imageProcessor = {
   // Resize an image to new dimensions
   resize(image, newWidth, newHeight) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    canvas.width = newWidth;
-    canvas.height = newHeight;
-    
-    // Use high-quality scaling
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    
-    ctx.drawImage(image, 0, 0, newWidth, newHeight);
-    
-    // Convert canvas to image
-    const processedImage = new Image();
-    processedImage.src = canvas.toDataURL('image/png');
-    processedImage.width = newWidth;
-    processedImage.height = newHeight;
-    
-    return processedImage;
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+      
+      // Use high-quality scaling
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      
+      ctx.drawImage(image, 0, 0, newWidth, newHeight);
+      
+      // Return data URL directly - no need for Image object
+      const dataURL = canvas.toDataURL('image/png');
+      console.log('Resize complete:', { original: `${image.width}x${image.height}`, new: `${newWidth}x${newHeight}` });
+      resolve(dataURL);
+    });
   },
 
   // Remove background using edge detection
@@ -63,12 +62,15 @@ export const imageProcessor = {
     
     ctx.putImageData(imageData, 0, 0);
     
-    const processedImage = new Image();
-    processedImage.src = canvas.toDataURL('image/png');
-    processedImage.width = canvas.width;
-    processedImage.height = canvas.height;
-    
-    return processedImage;
+    return new Promise((resolve) => {
+      const processedImage = new Image();
+      processedImage.onload = () => {
+        processedImage.width = canvas.width;
+        processedImage.height = canvas.height;
+        resolve(processedImage);
+      };
+      processedImage.src = canvas.toDataURL('image/png');
+    });
   },
 
   // Apply color filters
@@ -88,12 +90,15 @@ export const imageProcessor = {
     
     ctx.drawImage(image, 0, 0);
     
-    const processedImage = new Image();
-    processedImage.src = canvas.toDataURL('image/png');
-    processedImage.width = canvas.width;
-    processedImage.height = canvas.height;
-    
-    return processedImage;
+    return new Promise((resolve) => {
+      const processedImage = new Image();
+      processedImage.onload = () => {
+        processedImage.width = canvas.width;
+        processedImage.height = canvas.height;
+        resolve(processedImage);
+      };
+      processedImage.src = canvas.toDataURL('image/png');
+    });
   },
 
   // Crop image to specified rectangle

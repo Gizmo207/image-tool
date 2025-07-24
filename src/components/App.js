@@ -7,16 +7,26 @@ import { LicenseManager } from '../utils/licenseManager';
 import '../styles/components.css';
 
 function App() {
+  console.log('🚀 FULL APP COMPONENT LOADED!');
+  
   const [originalImage, setOriginalImage] = useState(null);
   const [processedImage, setProcessedImage] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasProLicense] = useState(LicenseManager.checkLicense());
 
+  // Debug wrapper for setProcessedImage
+  const handleSetProcessedImage = (image) => {
+    console.log('🎯 App.js: Setting processed image:', image ? 'Data URL received' : 'NULL/UNDEFINED');
+    setProcessedImage(image);
+  };
+
   const handleImageUpload = (imageFile) => {
+    console.log('� Image upload handler called:', imageFile.name);
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
+        console.log('🖼️ Image loaded in App:', img.width, 'x', img.height);
         setOriginalImage(img);
         setProcessedImage(null);
       };
@@ -33,7 +43,7 @@ function App() {
         <Sidebar 
           onImageUpload={handleImageUpload}
           originalImage={originalImage}
-          setProcessedImage={setProcessedImage}
+          setProcessedImage={handleSetProcessedImage}
           setIsProcessing={setIsProcessing}
           hasProLicense={hasProLicense}
         />

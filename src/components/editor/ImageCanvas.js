@@ -4,24 +4,33 @@ import Button from '../ui/Button';
 import { downloadManager } from '../../utils/downloadManager';
 
 function ImageCanvas({ originalImage, processedImage, isProcessing, hasProLicense }) {
+  console.log('🖼️ ImageCanvas render:', { 
+    hasOriginal: !!originalImage, 
+    hasProcessed: !!processedImage, 
+    isProcessing,
+    processedType: typeof processedImage 
+  });
   const handleDownload = () => {
     if (processedImage) {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      canvas.width = processedImage.width;
-      canvas.height = processedImage.height;
-      
-      ctx.drawImage(processedImage, 0, 0);
-      
-      // Add watermark for free users
-      if (!hasProLicense) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.font = '16px Arial';
-        ctx.fillText('Image Editor Pro', 10, canvas.height - 10);
-      }
-      
-      downloadManager.downloadCanvas(canvas, 'edited-image.png');
+      const tempImg = new Image();
+      tempImg.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = tempImg.width;
+        canvas.height = tempImg.height;
+
+        ctx.drawImage(tempImg, 0, 0);
+
+        // Add watermark for free users
+        if (!hasProLicense) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.font = '16px Arial';
+          ctx.fillText('Image Editor Pro', 10, canvas.height - 10);
+        }
+
+        downloadManager.downloadCanvas(canvas, 'edited-image.png');
+      };
+      tempImg.src = processedImage;
     }
   };
 
@@ -47,7 +56,7 @@ function ImageCanvas({ originalImage, processedImage, isProcessing, hasProLicens
             {isProcessing ? (
               <Loading text="Processing your image..." />
             ) : processedImage ? (
-              <img src={processedImage.src} alt="Processed" />
+              <img src={processedImage} alt="Processed" />
             ) : (
               <div className="empty-state">
                 <p>Processed image will appear here</p>

@@ -48,8 +48,8 @@ A professional, browser-based image editing tool that allows you to resize image
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/image-editor-pro.git
-cd image-editor-pro
+git clone https://github.com/Gizmo207/image-tool.git
+cd image-tool
 npm install
 ```
 
@@ -67,7 +67,7 @@ npm run build
 
 ## 📁 Project Structure
 
-```
+```text
 src/
 ├── components/
 │   ├── ui/              # Reusable UI components
@@ -159,7 +159,7 @@ The app includes a simple license system:
 
 ## 📞 Support
 
-- 📧 Email: support@imageeditorpro.com
+- 📧 Email: <support@imageeditorpro.com>
 - 💬 Discord: [Join our community]
 - 📖 Docs: [Full documentation]
 - 🐛 Issues: [GitHub Issues]
