@@ -1,12 +1,26 @@
-/* Component-specific styles */
+/* Premium Dark Theme Components */
+
+/* Global App Styles */
+.app {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
 
 /* Header */
 .header {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(15, 15, 35, 0.95);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(64, 224, 255, 0.2);
   padding: 15px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .header-content {
@@ -20,11 +34,12 @@
 
 .logo h1 {
   font-size: 1.8rem;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #40e0ff, #ff40ff, #40e0ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin: 0;
+  font-weight: 800;
 }
 
 .header-actions {
@@ -53,6 +68,37 @@
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
+}
+
+/* Main Content Area */
+.main-content {
+  display: flex;
+  flex: 1;
+  margin-top: 80px; /* Account for fixed header */
+}
+
+.editor-area {
+  flex: 1;
+  background: rgba(10, 10, 25, 0.8);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+.editor-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(64, 224, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 64, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 /* Footer */
