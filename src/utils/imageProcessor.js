@@ -173,41 +173,60 @@ export const imageProcessor = {
 
   // Convert image to different format
   convert(image, format) {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      canvas.width = image.width;
-      canvas.height = image.height;
-      
-      // If converting to JPG, fill white background (JPG doesn't support transparency)
-      if (format === 'jpg' || format === 'jpeg') {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return new Promise((resolve, reject) => {
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = image.width;
+        canvas.height = image.height;
+        
+        // Ensure high quality rendering
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        
+        // If converting to JPG, fill white background (JPG doesn't support transparency)
+        if (format === 'jpg' || format === 'jpeg') {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        ctx.drawImage(image, 0, 0);
+        
+        // Convert format with appropriate quality settings
+        let mimeType, quality;
+        switch (format.toLowerCase()) {
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            quality = 0.92; // High quality JPEG
+            break;
+          case 'png':
+            mimeType = 'image/png';
+            quality = 1.0; // PNG is lossless
+            break;
+          case 'webp':
+            mimeType = 'image/webp';
+            quality = 0.90; // High quality WebP
+            break;
+          default:
+            mimeType = 'image/png';
+            quality = 1.0;
+        }
+        
+        const dataURL = canvas.toDataURL(mimeType, quality);
+        console.log('Format conversion complete:', { 
+          format, 
+          mimeType, 
+          quality,
+          originalSize: `${image.width}x${image.height}`,
+          dataURLLength: dataURL.length 
+        });
+        resolve(dataURL);
+      } catch (error) {
+        console.error('Format conversion failed:', error);
+        reject(error);
       }
-      
-      ctx.drawImage(image, 0, 0);
-      
-      // Convert format
-      let mimeType;
-      switch (format.toLowerCase()) {
-        case 'jpg':
-        case 'jpeg':
-          mimeType = 'image/jpeg';
-          break;
-        case 'png':
-          mimeType = 'image/png';
-          break;
-        case 'webp':
-          mimeType = 'image/webp';
-          break;
-        default:
-          mimeType = 'image/png';
-      }
-      
-      const dataURL = canvas.toDataURL(mimeType, 0.9);
-      console.log('Format conversion complete:', { format, mimeType });
-      resolve(dataURL);
     });
   }
 };

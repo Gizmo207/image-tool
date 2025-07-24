@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '../ui/Button';
+import logo from '../../assets/logo.png';
 
 function Header({ hasProLicense }) {
   const handleUpgrade = () => {
@@ -11,7 +12,8 @@ function Header({ hasProLicense }) {
     <header className="header">
       <div className="header-content">
         <div className="logo">
-          <h1>🖼️ Image Editor Pro</h1>
+          <img src={logo} alt="Image Editor Pro" className="logo-image" />
+          <h1>Image Editor Pro</h1>
         </div>
         
         <div className="header-actions">

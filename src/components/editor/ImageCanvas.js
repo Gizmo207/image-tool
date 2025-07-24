@@ -2,6 +2,7 @@ import React from 'react';
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
 import { downloadManager } from '../../utils/downloadManager';
+import { formatSupport } from '../../utils/formatSupport';
 
 const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFormat = 'png', hasProLicense }) => {
   console.log('🖼️ ImageCanvas render:', { 
@@ -20,19 +21,89 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
         canvas.width = tempImg.width;
         canvas.height = tempImg.height;
 
+        // For JPG format, fill with white background to avoid transparency issues
+        if (processedFormat === 'jpg' || processedFormat === 'jpeg') {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
         ctx.drawImage(tempImg, 0, 0);
 
         // Add watermark for free users
         if (!hasProLicense) {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-          ctx.font = '16px Arial';
-          ctx.fillText('Image Editor Pro', 10, canvas.height - 10);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.font = 'bold 16px Arial';
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+          ctx.lineWidth = 1;
+          const text = 'Image Editor Pro';
+          ctx.strokeText(text, 10, canvas.height - 10);
+          ctx.fillText(text, 10, canvas.height - 10);
         }
 
         // Generate filename with correct extension
         const filename = `edited-image.${processedFormat}`;
-        downloadManager.downloadCanvas(canvas, filename);
+        
+        // Get proper MIME type and quality settings
+        let mimeType, quality;
+        switch (processedFormat.toLowerCase()) {
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            quality = 0.92; // High quality for JPEG
+            break;
+          case 'webp':
+            mimeType = 'image/webp';
+            quality = 0.90; // High quality for WebP
+            break;
+          case 'png':
+          default:
+            mimeType = 'image/png';
+            quality = 1.0; // PNG is lossless
+            break;
+        }
+
+        // Create download link with proper format
+        const link = document.createElement('a');
+        link.download = filename;
+        const dataURL = canvas.toDataURL(mimeType, quality);
+        
+        // Validate format support and data URL
+        if (!formatSupport.supportsFormat(processedFormat)) {
+          console.error('Format not supported by browser:', processedFormat);
+          alert(`${processedFormat.toUpperCase()} format is not supported by your browser. Downloading as PNG instead.`);
+          // Fallback to PNG
+          link.download = `edited-image.png`;
+          link.href = canvas.toDataURL('image/png', 1.0);
+        } else {
+          // Validate the data URL before download
+          const validation = formatSupport.validateDataURL(dataURL, processedFormat);
+          if (!validation.valid) {
+            console.error('Invalid data URL generated:', validation.error);
+            alert(`Failed to generate ${processedFormat.toUpperCase()} file: ${validation.error}. Try PNG format instead.`);
+            return;
+          }
+          
+          console.log('Download initiated:', { 
+            filename, 
+            mimeType, 
+            quality, 
+            dataURLLength: dataURL.length,
+            dataURLPrefix: dataURL.substring(0, 50) + '...'
+          });
+          
+          link.href = dataURL;
+        }
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       };
+      
+      tempImg.onerror = () => {
+        console.error('Failed to load processed image for download');
+        alert('Failed to download image. Please try again.');
+      };
+      
       tempImg.src = processedImage;
     }
   };
