@@ -1,4 +1,4 @@
-// ResizeControls.js - Improved version with popular social media presets
+// ResizeControls.js - Clean version with fixed presets and improved layout
 import React, { useState, useEffect } from 'react';
 
 const ResizeControls = ({ originalImage, onResize }) => {
@@ -17,7 +17,14 @@ const ResizeControls = ({ originalImage, onResize }) => {
       description: "Perfect for Instagram posts"
     },
     {
-      name: "Discord Avatar",
+      name: "Instagram Story (Vertical)",
+      width: 1080,
+      height: 1920,
+      icon: "📱",
+      description: "Instagram/Facebook Stories"
+    },
+    {
+      name: "Discord Avatar", 
       width: 512,
       height: 512,
       icon: "🎮",
@@ -36,6 +43,13 @@ const ResizeControls = ({ originalImage, onResize }) => {
       height: 500,
       icon: "🐦",
       description: "Twitter profile header"
+    },
+    {
+      name: "LinkedIn Post",
+      width: 1200,
+      height: 627,
+      icon: "💼",
+      description: "LinkedIn social media post"
     }
   ];
 
@@ -50,17 +64,19 @@ const ResizeControls = ({ originalImage, onResize }) => {
 
   // Handle width change with aspect ratio
   const handleWidthChange = (newWidth) => {
-    setWidth(newWidth);
-    if (maintainAspect && originalImage) {
-      setHeight(Math.round(newWidth / originalAspectRatio));
+    const widthValue = parseInt(newWidth) || 0;
+    setWidth(widthValue);
+    if (maintainAspect && originalAspectRatio && widthValue > 0) {
+      setHeight(Math.round(widthValue / originalAspectRatio));
     }
   };
 
   // Handle height change with aspect ratio
   const handleHeightChange = (newHeight) => {
-    setHeight(newHeight);
-    if (maintainAspect && originalImage) {
-      setWidth(Math.round(newHeight * originalAspectRatio));
+    const heightValue = parseInt(newHeight) || 0;
+    setHeight(heightValue);
+    if (maintainAspect && originalAspectRatio && heightValue > 0) {
+      setWidth(Math.round(heightValue * originalAspectRatio));
     }
   };
 
@@ -68,7 +84,7 @@ const ResizeControls = ({ originalImage, onResize }) => {
   const applyPreset = (preset) => {
     setWidth(preset.width);
     setHeight(preset.height);
-    // Temporarily disable aspect ratio for presets
+    // Temporarily disable aspect ratio for presets since they have specific dimensions
     setMaintainAspect(false);
   };
 
@@ -77,32 +93,41 @@ const ResizeControls = ({ originalImage, onResize }) => {
     (parseInt(width) !== originalImage.width || parseInt(height) !== originalImage.height);
 
   // Handle resize
-  const handleResize = () => {
+  const handleApplyResize = () => {
     if (!originalImage || !hasChanges) return;
     
     const newWidth = parseInt(width);
     const newHeight = parseInt(height);
     
-    if (newWidth > 0 && newHeight > 0) {
+    if (newWidth > 0 && newHeight > 0 && newWidth <= 4000 && newHeight <= 4000) {
       onResize(newWidth, newHeight);
     }
   };
 
+  if (!originalImage) {
+    return (
+      <div className="resize-controls">
+        <div className="no-image-message">
+          <p>� Upload an image to start resizing</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="resize-controls">
-      <h3>🔧 Resize Settings</h3>
-      
-      {/* Original Image Info */}
-      {originalImage && (
-        <div className="image-info">
-          <p><strong>Original:</strong> {originalImage.width} × {originalImage.height}px</p>
+      {/* Current Image Info */}
+      <div className="image-info-section">
+        <div className="size-label">Size</div>
+        <div className="current-dimensions">
+          {originalImage.width} × {originalImage.height} px
         </div>
-      )}
+      </div>
 
-      {/* Popular Presets */}
+      {/* Quick Presets Section */}
       <div className="presets-section">
         <h4>🎯 Quick Presets</h4>
-        <div className="preset-buttons">
+        <div className="preset-grid">
           {POPULAR_PRESETS.map((preset, index) => (
             <button
               key={index}
@@ -110,71 +135,80 @@ const ResizeControls = ({ originalImage, onResize }) => {
               onClick={() => applyPreset(preset)}
               title={preset.description}
             >
-              {preset.icon} {preset.name}
-              <small>{preset.width}×{preset.height}</small>
+              <span className="preset-icon">{preset.icon}</span>
+              <div className="preset-info">
+                <div className="preset-name">{preset.name}</div>
+                <div className="preset-size">{preset.width}×{preset.height}</div>
+              </div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Manual Controls */}
+      {/* Manual Size Controls */}
       <div className="manual-controls">
-        <h4>✏️ Custom Size</h4>
+        <h4>✏️ Custom Dimensions</h4>
         
         <div className="dimension-inputs">
-          <div className="input-group">
-            <label>Width (px):</label>
-            <input
-              type="number"
-              value={width}
-              onChange={(e) => handleWidthChange(e.target.value)}
-              min="1"
-              max="4000"
-            />
-          </div>
-          
-          <div className="input-group">
-            <label>Height (px):</label>
-            <input
-              type="number"
-              value={height}
-              onChange={(e) => handleHeightChange(e.target.value)}
-              min="1"
-              max="4000"
-            />
+          <div className="input-row">
+            <div className="input-group">
+              <label htmlFor="width-input">Width</label>
+              <input
+                id="width-input"
+                type="number"
+                value={width}
+                onChange={(e) => handleWidthChange(e.target.value)}
+                min="1"
+                max="4000"
+                placeholder="Width"
+              />
+              <span className="unit">px</span>
+            </div>
+            
+            <div className="dimension-separator">×</div>
+            
+            <div className="input-group">
+              <label htmlFor="height-input">Height</label>
+              <input
+                id="height-input"
+                type="number"
+                value={height}
+                onChange={(e) => handleHeightChange(e.target.value)}
+                min="1"
+                max="4000"
+                placeholder="Height"
+              />
+              <span className="unit">px</span>
+            </div>
           </div>
         </div>
 
         <div className="aspect-ratio-control">
-          <label>
+          <label className="checkbox-label">
             <input
               type="checkbox"
               checked={maintainAspect}
               onChange={(e) => setMaintainAspect(e.target.checked)}
             />
-            🔗 Lock aspect ratio
+            <span className="checkbox-text">🔗 Lock aspect ratio</span>
           </label>
         </div>
       </div>
 
-      {/* Status and Resize Button */}
-      <div className="resize-status">
-        {originalImage && (
-          <div className={`status-indicator ${hasChanges ? 'ready' : 'no-change'}`}>
-            {hasChanges ? (
-              <p>✅ Ready to resize to {width} × {height}px</p>
-            ) : (
-              <p>⚪ No changes - same as original</p>
-            )}
+      {/* Apply Button */}
+      <div className="apply-section">
+        {hasChanges && (
+          <div className="resize-preview">
+            ➡️ New size: <strong>{width} × {height} px</strong>
           </div>
         )}
         
         <button
-          className="resize-btn"
-          onClick={handleResize}
-          disabled={!originalImage || !hasChanges}
+          className={`apply-btn ${hasChanges ? 'ready' : 'disabled'}`}
+          onClick={handleApplyResize}
+          disabled={!hasChanges}
         >
-          🔄 Apply Resize
+          {hasChanges ? '✅ Apply Resize' : '⚪ No Changes'}
         </button>
       </div>
     </div>

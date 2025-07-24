@@ -1,5 +1,5 @@
 // PremiumSidebar.js - Stunning premium UI sidebar
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { imageProcessor } from '../../utils/imageProcessor';
 import './PremiumSidebar.css';
 
@@ -12,17 +12,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   
   const [dragOver, setDragOver] = useState(false);
   const [activeTab, setActiveTab] = useState('upload');
-  const [customWidth, setCustomWidth] = useState('');
-  const [customHeight, setCustomHeight] = useState('');
   const fileInputRef = useRef(null);
-
-  // Update custom dimensions when image changes
-  useEffect(() => {
-    if (originalImage) {
-      setCustomWidth(originalImage.width.toString());
-      setCustomHeight(originalImage.height.toString());
-    }
-  }, [originalImage]);
 
   const handleFileSelect = (file) => {
     console.log('🎯 PremiumSidebar: File selected:', file);
@@ -56,10 +46,6 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const handleResize = async (width, height) => {
     if (!originalImage) return;
     
-    // Update the custom width/height to reflect the chosen dimensions
-    setCustomWidth(width.toString());
-    setCustomHeight(height.toString());
-    
     setIsProcessing(true);
     try {
       const resizedDataUrl = await imageProcessor.resize(originalImage, width, height);
@@ -69,17 +55,6 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
       alert('Failed to resize image. Please try again.');
     }
     setIsProcessing(false);
-  };
-
-  const handleCustomResize = () => {
-    const width = parseInt(customWidth);
-    const height = parseInt(customHeight);
-    
-    if (width > 0 && height > 0 && width <= 4000 && height <= 4000) {
-      handleResize(width, height);
-    } else {
-      alert('Please enter valid dimensions (1-4000 pixels)');
-    }
   };
 
   const handleFilter = async (filterType) => {
@@ -157,6 +132,12 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
             />
           </div>
 
+          {originalImage && (
+            <div className="image-info">
+              <span className="info-label">Size:</span>
+              <span className="info-value">{originalImage.width} × {originalImage.height}px</span>
+            </div>
+          )}
         </section>
 
         {originalImage && (
@@ -166,7 +147,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                 <div className="tool-icon">📷</div>
                 <div className="tool-info">
                   <h3>Social Media Resize</h3>
-                  <p>Perfect sizes for Instagram, Facebook, Twitter and Discord</p>
+                  <p>Perfect sizes for Instagram, Facebook, Twitter and more</p>
                 </div>
               </div>
               
@@ -186,63 +167,11 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                   <span className="preset-name">Twitter</span>
                   <span className="preset-size">1024×512</span>
                 </button>
-                <button className="preset-btn" onClick={() => handleResize(512, 512)}>
-                  <span className="preset-icon">🎮</span>
-                  <span className="preset-name">Discord</span>
-                  <span className="preset-size">512×512</span>
+                <button className="preset-btn" onClick={() => handleResize(1080, 1920)}>
+                  <span className="preset-icon">📱</span>
+                  <span className="preset-name">Story</span>
+                  <span className="preset-size">1080×1920</span>
                 </button>
-              </div>
-              
-              {/* Custom Size Inputs */}
-              <div className="custom-resize-section">
-                <h4>✏️ Custom Size</h4>
-                <div className="custom-inputs">
-                  <div className="input-row">
-                    <div className="input-group">
-                      <label>Width</label>
-                      <input
-                        type="number"
-                        value={customWidth}
-                        onChange={(e) => setCustomWidth(e.target.value)}
-                        min="1"
-                        max="4000"
-                        placeholder="Width"
-                      />
-                      <span className="unit">px</span>
-                    </div>
-                    
-                    <div className="dimension-separator">×</div>
-                    
-                    <div className="input-group">
-                      <label>Height</label>
-                      <input
-                        type="number"
-                        value={customHeight}
-                        onChange={(e) => setCustomHeight(e.target.value)}
-                        min="1"
-                        max="4000"
-                        placeholder="Height"
-                      />
-                      <span className="unit">px</span>
-                    </div>
-                  </div>
-                  
-                  {/* Final Dimensions Display */}
-                  <div className="final-dimensions">
-                    <span className="dimensions-label">Final Size:</span>
-                    <span className="dimensions-value">
-                      {customWidth || originalImage?.width || 0} × {customHeight || originalImage?.height || 0}px
-                    </span>
-                  </div>
-                  
-                  <button 
-                    className="custom-resize-btn"
-                    onClick={handleCustomResize}
-                    disabled={!customWidth || !customHeight || customWidth === originalImage?.width.toString() && customHeight === originalImage?.height.toString()}
-                  >
-                    ✅ Apply Custom Size
-                  </button>
-                </div>
               </div>
             </div>
 
