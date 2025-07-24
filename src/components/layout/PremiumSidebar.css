@@ -205,6 +205,38 @@
     color: rgba(255, 255, 255, 0.6);
 }
 
+.tools-preview {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(64, 224, 255, 0.05);
+    border: 1px solid rgba(64, 224, 255, 0.2);
+    border-radius: 10px;
+}
+
+.preview-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #40e0ff;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.preview-tools {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.preview-tool {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 6px 10px;
+    background: rgba(64, 224, 255, 0.1);
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid rgba(64, 224, 255, 0.2);
+}
+
 .image-info {
     margin-top: 15px;
     padding: 12px;

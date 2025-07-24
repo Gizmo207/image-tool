@@ -4,14 +4,25 @@ import { imageProcessor } from '../../utils/imageProcessor';
 import './PremiumSidebar.css';
 
 const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIsProcessing, hasProLicense }) => {
+  console.log('🎨 PremiumSidebar render:', { 
+    hasOriginalImage: !!originalImage, 
+    originalImageDimensions: originalImage ? `${originalImage.width}x${originalImage.height}` : 'none',
+    hasProLicense 
+  });
+  
   const [dragOver, setDragOver] = useState(false);
   const [activeTab, setActiveTab] = useState('upload');
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (file) => {
+    console.log('🎯 PremiumSidebar: File selected:', file);
     if (file && file.type.startsWith('image/')) {
+      console.log('✅ Valid image file, calling onImageUpload');
       onImageUpload(file);
       setActiveTab('resize');
+    } else {
+      console.log('❌ Invalid file type:', file?.type);
+      alert('Please select a valid image file (JPG, PNG, GIF, WebP)');
     }
   };
 
@@ -89,6 +100,26 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
             <div className="upload-hint">
               Supports JPG, PNG, GIF, WebP up to 10MB
             </div>
+            
+            {!originalImage && (
+              <div className="tools-preview">
+                <p className="preview-title">� Step 1: Upload an image above ☝️</p>
+                <div className="step-indicator">
+                  <span className="step current">1️⃣ Upload Image</span>
+                  <span className="step-arrow">→</span>
+                  <span className="step next">2️⃣ Choose Tool</span>
+                  <span className="step-arrow">→</span>
+                  <span className="step next">3️⃣ Process & Download</span>
+                </div>
+                <p className="preview-subtitle">🔧 Tools that will unlock:</p>
+                <div className="preview-tools">
+                  <span className="preview-tool">📷 Social Media Resize</span>
+                  <span className="preview-tool">✂️ AI Background Removal</span>
+                  <span className="preview-tool">🔄 Format Converter</span>
+                  <span className="preview-tool">🎨 Premium Filters</span>
+                </div>
+              </div>
+            )}
             
             <input
               ref={fileInputRef}
