@@ -5,6 +5,7 @@ A professional, browser-based image editing tool that allows you to resize image
 ## ✨ Features
 
 ### 🆓 Free Version
+
 - ✅ Resize images up to 1920px
 - ✅ Basic background removal
 - ✅ Simple color adjustments
@@ -13,6 +14,7 @@ A professional, browser-based image editing tool that allows you to resize image
 - ⚠️ Small watermark on exports
 
 ### 💎 Pro Version ($39 one-time)
+
 - ✅ **Unlimited resolution** - No size limits!
 - ✅ **Unlimited edits** - Use as much as you want
 - ✅ **Advanced AI background removal**
@@ -39,10 +41,12 @@ A professional, browser-based image editing tool that allows you to resize image
 ## 🛠️ Development
 
 ### Prerequisites
+
 - Node.js 16+
 - npm or yarn
 
 ### Installation
+
 ```bash
 git clone https://github.com/yourusername/image-editor-pro.git
 cd image-editor-pro
@@ -50,11 +54,13 @@ npm install
 ```
 
 ### Development Server
+
 ```bash
 npm run dev
 ```
 
 ### Build for Production
+
 ```bash
 npm run build
 ```
@@ -76,12 +82,14 @@ src/
 ## 🎯 Business Model
 
 ### Why One-Time Purchase?
+
 - **No subscription fatigue** - Pay once, own forever
 - **Fair pricing** - Less than 2 months of other tools
 - **Complete ownership** - Works offline, no dependencies
 - **Lifetime updates** - Stay current without extra cost
 
 ### Target Market
+
 - **Content creators** who need quick image editing
 - **Small businesses** tired of subscription tools
 - **Students and educators** who want affordable software
@@ -90,6 +98,7 @@ src/
 ## 🔐 License Management
 
 The app includes a simple license system:
+
 - Free users get limited features with watermarks
 - Pro users unlock all features with a license key
 - License validation happens client-side (enhance for production)
@@ -97,25 +106,30 @@ The app includes a simple license system:
 ## 🚀 Deployment Options
 
 ### Web App
+
 - Deploy to Vercel, Netlify, or any static host
 - Zero server costs - everything runs client-side
 
 ### Desktop App
+
 - Package with Electron for Windows/Mac/Linux
 - Distribute through your website or app stores
 
 ### White Label
+
 - Customize branding and colors
 - Sell under your own brand
 
 ## 🎨 Customization
 
 ### Themes
+
 - Light/dark mode support
 - Professional and creative themes
 - Easy CSS variable customization
 
 ### Features
+
 - Modular component architecture
 - Easy to add new editing tools
 - Plugin system ready
@@ -123,11 +137,13 @@ The app includes a simple license system:
 ## 📈 Marketing Ideas
 
 ### Positioning
+
 - "Stop the subscription madness!"
 - "Own your image editor forever"
 - "Professional results without Photoshop prices"
 
 ### Channels
+
 - **Content creators** on YouTube/TikTok
 - **Small business forums** and communities
 - **Educational institutions** looking for budget tools
