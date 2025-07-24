@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
-import Sidebar from './layout/Sidebar';
+import PremiumSidebar from './layout/PremiumSidebar';
 import ImageCanvas from './editor/ImageCanvas';
 import { LicenseManager } from '../utils/licenseManager';
 import '../styles/components.css';
@@ -40,7 +40,7 @@ function App() {
       <Header hasProLicense={hasProLicense} />
       
       <main className="main-content">
-        <Sidebar 
+        <PremiumSidebar 
           onImageUpload={handleImageUpload}
           originalImage={originalImage}
           setProcessedImage={handleSetProcessedImage}
