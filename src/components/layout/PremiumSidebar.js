@@ -781,8 +781,8 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
               <div className="tool-header">
                 <div className="tool-icon">🏆</div>
                 <div className="tool-info">
-                  <h3>Google MediaPipe Background Removal</h3>
-                  <p>BEST free AI • Professional quality • No limits</p>
+                  <h3>Google MediaPipe AI</h3>
+                  <p>The ONLY background remover • Professional • Free forever</p>
                 </div>
               </div>
               
@@ -791,7 +791,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                 onClick={() => handleFilter('remove-bg')}
                 disabled={isProcessing}
               >
-                {isProcessing ? '🏆 AI Processing...' : '🏆 Remove Background (FREE)'}
+                {isProcessing ? '🏆 Google AI Processing...' : '🏆 Remove Background'}
               </button>
             </div>
           </div>

@@ -5,11 +5,11 @@ const BackgroundRemovalProgress = ({ isVisible, onComplete }) => {
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState('');
   const [stages] = useState([
-    { key: 'load', label: 'Loading MediaPipe Model', icon: '🧠' },
-    { key: 'segment', label: 'AI Segmentation Analysis', icon: '🔍' },
-    { key: 'mask', label: 'Creating Precision Mask', icon: '🎭' },
-    { key: 'matting', label: 'Edge Refinement', icon: '✨' },
-    { key: 'export', label: 'Exporting Result', icon: '💾' }
+    { key: 'load', label: 'Loading Google AI Model', icon: '🧠' },
+    { key: 'segment', label: 'AI Semantic Analysis', icon: '🔍' },
+    { key: 'mask', label: 'Professional Segmentation', icon: '🎭' },
+    { key: 'refine', label: 'Edge Enhancement', icon: '✨' },
+    { key: 'export', label: 'Finalizing PNG', icon: '💾' }
   ]);
 
   useEffect(() => {
@@ -47,8 +47,8 @@ const BackgroundRemovalProgress = ({ isVisible, onComplete }) => {
       <div className="bg-removal-progress-container">
         <div className="bg-removal-header">
           <div className="bg-removal-icon">🏆</div>
-          <h3>Google MediaPipe Background Removal</h3>
-          <p>Best free AI • Professional quality • No API needed</p>
+          <h3>Google MediaPipe AI</h3>
+          <p>The ONLY background remover • Free forever • Best quality</p>
         </div>
 
         <div className="bg-removal-stages">
