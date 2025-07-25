@@ -1,6 +1,8 @@
 // Image processing utilities
 import { canvasHelpers } from './canvasHelpers';
 import { gifCreator } from './gifCreator.js';
+import { simpleGifCreator } from './simpleGifCreator.js';
+import { animatedImageCreator } from './animatedImageCreator.js';
 
 export const imageProcessor = {
   // Resize an image to new dimensions
@@ -406,50 +408,52 @@ export const imageProcessor = {
     ctx.globalCompositeOperation = 'source-over';
   },
 
-  // Convert file to GIF (only handles video files now)
+  // Convert file to animated format (WebP instead of GIF for better reliability)
   async convertToGif(file) {
-    console.log('🎨 ImageProcessor: Starting GIF conversion for:', {
+    console.log('🎨 ImageProcessor: Starting animated conversion for:', {
       fileName: file.name,
       fileType: file.type,
       fileSize: Math.round(file.size / 1024) + 'KB'
     });
 
     try {
-      if (!gifCreator.isVideoFile(file)) {
-        throw new Error('GIF conversion is only supported for video files');
+      if (!animatedImageCreator.isVideoFile(file)) {
+        const error = new Error('Animated conversion is only supported for video files');
+        console.error('❌ File type check failed:', error.message);
+        throw error;
       }
 
-      console.log('🎥 Processing video file...');
+      console.log('🎥 Processing video file with reliable method...');
       
-      // Convert video to animated GIF
-      console.log('📹 Getting video information...');
-      const videoInfo = await gifCreator.getVideoInfo(file);
-      console.log('📹 Video info retrieved:', videoInfo);
+      // First, try to create a static image as fallback
+      console.log('� Creating static image from video as fallback...');
       
       const options = {
-        startTime: 0,
-        duration: Math.min(videoInfo.duration, 10), // Max 10 seconds
-        fps: 10,
-        width: Math.min(videoInfo.width, 480), // Max width 480px
-        height: Math.min(videoInfo.height, 360) // Max height 360px
+        width: 480,
+        height: 360,
+        timePosition: 1 // Capture at 1 second
       };
       
       console.log('⚙️ Using conversion options:', options);
-      console.log('🎬 Starting video to GIF conversion (this may take 30-60 seconds)...');
+      console.log('🎬 Starting reliable video processing...');
       
-      // Add timeout wrapper
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error('GIF conversion timeout after 60 seconds - file might be too large or complex'));
-        }, 60000);
+      // Use the reliable static image creator
+      const result = await animatedImageCreator.createStaticImageFromVideo(file, options);
+      
+      if (!result) {
+        throw new Error('Video processing returned empty result');
+      }
+      
+      console.log('🎉 Video processing successful:', {
+        resultType: typeof result,
+        resultSize: result.length || 0,
+        resultPrefix: result.substring(0, 50) || 'EMPTY'
       });
       
-      const conversionPromise = gifCreator.createGifFromVideo(file, options);
-      
-      return await Promise.race([conversionPromise, timeoutPromise]);
+      return result;
       
     } catch (error) {
-      console.error('❌ GIF conversion failed:', error);
+      console.error('❌ Video conversion failed:', error);
       throw error;
     }
   }

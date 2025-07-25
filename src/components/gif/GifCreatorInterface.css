@@ -1,0 +1,155 @@
+/* GIF Creator Interface Styles */
+.gif-creator-interface {
+  padding: 20px;
+  background: rgba(15, 15, 35, 0.95);
+  border-radius: 12px;
+  border: 2px solid rgba(64, 224, 255, 0.3);
+  color: white;
+}
+
+.gif-creator-empty {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.video-preview-section {
+  margin-bottom: 25px;
+}
+
+.video-preview-section h4 {
+  color: #40e0ff;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.video-container {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.video-info {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.gif-settings-section {
+  margin-bottom: 25px;
+}
+
+.gif-settings-section h4 {
+  color: #40e0ff;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.setting-group {
+  margin-bottom: 15px;
+}
+
+.setting-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #e0e0e0;
+}
+
+.setting-group input[type="range"] {
+  width: 100%;
+  height: 6px;
+  background: rgba(64, 224, 255, 0.2);
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.setting-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(45deg, #40e0ff, #00a8cc);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(64, 224, 255, 0.4);
+}
+
+.setting-group input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(45deg, #40e0ff, #00a8cc);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(64, 224, 255, 0.4);
+}
+
+.setting-preview {
+  background: rgba(64, 224, 255, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(64, 224, 255, 0.2);
+  margin-top: 15px;
+}
+
+.preview-info {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #e0e0e0;
+}
+
+.create-section {
+  text-align: center;
+}
+
+.create-gif-button {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a5a);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.create-gif-button:hover:not(:disabled) {
+  background: linear-gradient(45deg, #ff5252, #e53935);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.create-gif-button:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.create-gif-button.creating {
+  background: linear-gradient(45deg, #40e0ff, #00a8cc);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.progress-message {
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(64, 224, 255, 0.1);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #40e0ff;
+}

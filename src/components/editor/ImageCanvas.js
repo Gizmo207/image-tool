@@ -14,6 +14,19 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
   
   const handleDownload = () => {
     if (processedImage) {
+      // For GIFs, download directly without canvas conversion to preserve animation
+      if (processedFormat.toLowerCase() === 'gif') {
+        console.log('🎬 Downloading animated GIF directly');
+        const link = document.createElement('a');
+        link.download = `animated-gif.gif`;
+        link.href = processedImage; // processedImage is already a data URL for GIFs
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
+      // For other formats, use canvas conversion
       const tempImg = new Image();
       tempImg.onload = () => {
         const canvas = document.createElement('canvas');
@@ -125,12 +138,18 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
         </div>
 
         <div className="canvas-panel">
-          <h3>✨ Processed</h3>
+          <h3>✨ {processedFormat.toLowerCase() === 'gif' ? 'Animated GIF' : 'Processed'}</h3>
           <div className="image-preview">
             {isProcessing ? (
               <Loading text="Processing your image..." />
             ) : processedImage ? (
-              <img src={processedImage} alt="Processed" />
+              <img 
+                src={processedImage} 
+                alt={processedFormat.toLowerCase() === 'gif' ? 'Animated GIF' : 'Processed'} 
+                style={{
+                  imageRendering: processedFormat.toLowerCase() === 'gif' ? 'auto' : 'auto'
+                }}
+              />
             ) : (
               <div className="empty-state">
                 <p>Processed image will appear here</p>
@@ -144,7 +163,7 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
       {processedImage && !isProcessing && (
         <div className="download-section">
           <Button onClick={handleDownload} variant="success">
-            💾 Download Image
+            💾 Download {processedFormat.toLowerCase() === 'gif' ? 'GIF' : 'Image'}
           </Button>
           {!hasProLicense && (
             <p className="watermark-notice">

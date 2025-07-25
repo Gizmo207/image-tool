@@ -1,7 +1,9 @@
 // PremiumSidebar.js - Stunning premium UI sidebar
 import React, { useState, useRef, useEffect } from 'react';
 import { imageProcessor } from '../../utils/imageProcessor';
+import GifCreatorInterface from '../gif/GifCreatorInterface';
 import './PremiumSidebar.css';
+import '../gif/GifCreatorInterface.css';
 
 const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIsProcessing, isProcessing, setProcessedFormat, hasProLicense }) => {
   console.log('🎨 PremiumSidebar render:', { 
@@ -187,17 +189,45 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
           throw new Error('GIF conversion is only available for video files. Please upload a video file first.');
         }
         
-        console.log('🎬 Converting video to GIF using original video file:', videoFile.name);
-        setProcessingStatus('📹 Loading video information...');
+        console.log('🎬 Converting video to image using original video file:', {
+          fileName: videoFile.name,
+          fileSize: Math.round(videoFile.size / 1024) + 'KB',
+          fileType: videoFile.type
+        });
+        
+        setProcessingStatus('📹 Loading video...');
         await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UI update
         
-        setProcessingStatus('🎬 Converting video to GIF frames...');
+        setProcessingStatus('🎬 Extracting frame from video...');
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        setProcessingStatus('⚙️ This may take 30-60 seconds for video files...');
+        setProcessingStatus('⚙️ Processing video frame...');
         
-        convertedDataUrl = await imageProcessor.convertToGif(videoFile);
-        console.log('✅ GIF conversion completed successfully');
+        try {
+          console.log('🔧 Calling imageProcessor.convertToGif (now creates static image)...');
+          convertedDataUrl = await imageProcessor.convertToGif(videoFile);
+          console.log('✅ Video frame extraction completed successfully:', {
+            dataUrlSize: convertedDataUrl?.length || 0,
+            dataUrlPrefix: convertedDataUrl?.substring(0, 50) || 'EMPTY'
+          });
+          
+          if (!convertedDataUrl) {
+            throw new Error('Video frame extraction returned empty result');
+          }
+          
+        } catch (videoError) {
+          console.error('❌ Detailed video processing error:', {
+            error: videoError,
+            message: videoError.message,
+            stack: videoError.stack,
+            videoFile: {
+              name: videoFile.name,
+              size: videoFile.size,
+              type: videoFile.type
+            }
+          });
+          throw gifError;
+        }
         
       } else {
         console.log('🖼️ Converting to standard format...');
@@ -217,8 +247,8 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
       setConversionSuccess(true);
       
       if (selectedFormat.toLowerCase() === 'gif') {
-        setSuccessMessage(`✨ Successfully converted video to animated GIF! Your GIF is ready to download. 📥`);
-        console.log('🎉 Video to GIF conversion successful!');
+        setSuccessMessage(`✨ Successfully extracted frame from video! Your image is ready to download. 📥`);
+        console.log('🎉 Video frame extraction successful!');
       } else {
         setSuccessMessage(`✨ Successfully converted to ${selectedFormat.toUpperCase()}! Your image is ready to download. 📥`);
         console.log('🎉 Format conversion successful!');
@@ -520,37 +550,28 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
               )}
             </div>
 
-            {/* GIF Creator - Standalone Tool */}
+            {/* GIF Creator - Standalone Tool with Advanced Interface */}
             <div className="tool-card">
               <div className="tool-header">
                 <div className="tool-icon">🎬</div>
                 <div className="tool-info">
                   <h3>GIF Creator</h3>
-                  <p>Convert videos to animated GIFs</p>
+                  <p>Create animated GIFs from your videos with full control</p>
                 </div>
               </div>
               
-              {isVideoFile ? (
-                <button 
-                  className={`tool-button ${isProcessing && selectedFormat === 'gif' ? 'processing' : ''}`}
-                  onClick={() => {
-                    setSelectedFormat('gif');
-                    handleFormatConvert();
-                  }}
-                  disabled={isProcessing}
-                >
-                  {isProcessing && selectedFormat === 'gif' ? (
-                    <>🔄 Creating GIF...</>
-                  ) : (
-                    <>🎬 Create Animated GIF</>
-                  )}
-                </button>
-              ) : (
-                <div className="tool-disabled-message">
-                  <div className="disabled-icon">📹</div>
-                  <p>Upload a video file (MP4, MOV) to create animated GIFs</p>
-                </div>
-              )}
+              <GifCreatorInterface
+                videoFile={originalImage?.originalVideoFile || originalFile}
+                onGifCreated={(gifDataUrl) => {
+                  console.log('✅ GIF created successfully');
+                  setProcessedImage(gifDataUrl);
+                  setProcessedFormat('gif');
+                }}
+                onError={(errorMessage) => {
+                  console.error('❌ GIF creation error:', errorMessage);
+                  alert('GIF creation failed: ' + errorMessage);
+                }}
+              />
             </div>
 
             {/* Unified Color Tools Card */}
