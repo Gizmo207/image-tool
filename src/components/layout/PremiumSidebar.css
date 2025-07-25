@@ -485,6 +485,17 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+/* Disable hover effects when GIF creation is active */
+.tool-card.gif-creating:hover::before,
+.tool-card.gif-creating:hover {
+    opacity: inherit;
+    animation-duration: inherit;
+    border-color: inherit;
+    background: inherit;
+    transform: inherit;
+    box-shadow: inherit;
+}
+
 .tool-header {
     display: flex;
     align-items: center;

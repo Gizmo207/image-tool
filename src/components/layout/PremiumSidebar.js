@@ -23,6 +23,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const [processingStatus, setProcessingStatus] = useState(''); // Show current processing step
   const [processingTimeout, setProcessingTimeout] = useState(null);
   const [isVideoFile, setIsVideoFile] = useState(false); // Track if uploaded file is video
+  const [isGifCreating, setIsGifCreating] = useState(false); // Track if GIF is being created
   const fileInputRef = useRef(null);
   
   // Collapsible tool card states
@@ -551,7 +552,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
             </div>
 
             {/* GIF Creator - Standalone Tool with Advanced Interface */}
-            <div className="tool-card">
+            <div className={`tool-card ${isGifCreating ? 'gif-creating' : ''}`}>
               <div className="tool-header">
                 <div className="tool-icon">🎬</div>
                 <div className="tool-info">
@@ -566,12 +567,15 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                   console.log('✅ GIF created successfully');
                   setProcessedImage(gifDataUrl);
                   setProcessedFormat('gif');
+                  setIsGifCreating(false);
                 }}
                 onError={(errorMessage) => {
                   console.error('❌ GIF creation error:', errorMessage);
                   alert('GIF creation failed: ' + errorMessage);
+                  setIsGifCreating(false);
                 }}
                 onProgressUpdate={(progressData) => {
+                  setIsGifCreating(progressData.isCreating);
                   onGifProgressUpdate?.(progressData);
                 }}
               />
