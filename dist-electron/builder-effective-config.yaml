@@ -1,0 +1,38 @@
+directories:
+  output: dist-electron
+  buildResources: build
+appId: com.snapforge.app
+productName: SnapForge
+files:
+  - filter:
+      - build/**/*
+      - u2net/*.py
+      - server.js
+      - electron-pro.js
+      - package.json
+      - logo.png
+      - src/services/**/*
+      - src/components/**/*
+      - firebase-tools-config.json
+      - '!node_modules/**/*'
+      - '!u2net/*.pth'
+      - '!u2net/__pycache__/**/*'
+      - '!dist-electron/**/*'
+extraResources:
+  - from: u2net
+    to: u2net
+win:
+  target: nsis
+  icon: logo.png
+mac:
+  target: dmg
+  icon: build/icon.icns
+linux:
+  target: AppImage
+  icon: build/icon.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+electronVersion: 37.2.4

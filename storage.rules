@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // AI models and tools - public read access for licensed users
+    match /models/{modelFile} {
+      allow read: if true; // Public read (you can add license validation here later)
+      allow write: if false; // Admin only
+    }
+    
+    // User uploads - private to user
+    match /uploads/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

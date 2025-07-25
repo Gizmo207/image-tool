@@ -1,0 +1,32 @@
+{
+  "licenses": {
+    "SNAP-FORGE-TEST-2025-DEMO": {
+      "active": true,
+      "email": "test@example.com",
+      "purchaseDate": "2025-01-15T10:30:00Z",
+      "tier": "pro",
+      "unlockedTools": [
+        "background-removal",
+        "ai-upscaler", 
+        "face-enhancer",
+        "object-remover",
+        "style-transfer"
+      ],
+      "gumroadOrderId": "1234567890",
+      "customerName": "Test User",
+      "purchaseValue": 99.99
+    },
+    "SNAP-FORGE-BASIC-2025-TEST": {
+      "active": true,
+      "email": "basic@example.com", 
+      "purchaseDate": "2025-01-20T14:15:00Z",
+      "tier": "basic",
+      "unlockedTools": [
+        "background-removal"
+      ],
+      "gumroadOrderId": "0987654321",
+      "customerName": "Basic User",
+      "purchaseValue": 39.99
+    }
+  }
+}

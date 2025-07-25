@@ -128,6 +128,14 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const handleResize = async (width, height) => {
     if (!originalImage) return;
     
+    // Check trial usage before proceeding
+    const canUse = window.usageLimiter?.canUseTool('resize');
+    if (canUse && !canUse.allowed) {
+      const upgradePrompt = window.usageLimiter.getUpgradePrompt('resize');
+      alert(`${upgradePrompt.title}\n\n${upgradePrompt.message}\n\nClick "${upgradePrompt.cta}" to unlock unlimited resizing!`);
+      return;
+    }
+    
     // Update the custom width/height to reflect the chosen dimensions
     setCustomWidth(width.toString());
     setCustomHeight(height.toString());
@@ -137,6 +145,17 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
       const resizedDataUrl = await imageProcessor.resize(originalImage, width, height);
       setProcessedImage(resizedDataUrl);
       setProcessedFormat('png'); // Reset to PNG after resize
+      
+      // Record usage for trial system
+      if (window.usageLimiter) {
+        const result = window.usageLimiter.recordUsage('resize', {
+          width: width,
+          height: height,
+          aspectRatio: width / height
+        });
+        console.log('✅ Resize usage recorded:', result);
+      }
+      
     } catch (error) {
       console.error('Resize failed:', error);
       alert('Failed to resize image. Please try again.');

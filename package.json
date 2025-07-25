@@ -1,12 +1,19 @@
 {
-  "name": "image-editor-pro",
+  "name": "snapforge",
   "version": "1.0.0",
-  "description": "Professional image editing tool - resize, remove backgrounds, and more!",
-  "main": "src/index.js",
+  "description": "SnapForge - Professional image editing desktop app with AI background removal",
+  "main": "electron-pro.js",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "electron": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-pro": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron electron-pro.js\"",
+    "build-electron": "npm run build && electron-builder",
+    "dist-pro": "npm run build && electron-builder --publish=never",
+    "pack": "npm run build && electron-builder --dir",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -20,7 +27,9 @@
   "dependencies": {
     "@rollup/rollup-win32-x64-msvc": "^4.45.1",
     "cors": "^2.8.5",
+    "electron-is-dev": "^3.0.1",
     "express": "^5.1.0",
+    "firebase": "^12.0.0",
     "gif.js": "^0.2.0",
     "gifshot": "^0.4.5",
     "react": "^19.1.0",
@@ -28,6 +37,56 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.7.0",
-    "vite": "^7.0.6"
+    "concurrently": "^9.2.0",
+    "electron": "^37.2.4",
+    "electron-builder": "^26.0.12",
+    "vite": "^7.0.6",
+    "wait-on": "^8.0.4"
+  },
+  "build": {
+    "appId": "com.snapforge.app",
+    "productName": "SnapForge",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "build/**/*",
+      "u2net/*.py",
+      "server.js", 
+      "electron-pro.js",
+      "package.json",
+      "logo.png",
+      "src/services/**/*",
+      "src/components/**/*",
+      "firebase-tools-config.json",
+      "!node_modules/**/*",
+      "!u2net/*.pth",
+      "!u2net/__pycache__/**/*",
+      "!dist-electron/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "u2net",
+        "to": "u2net"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "logo.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }

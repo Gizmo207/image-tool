@@ -16,6 +16,21 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+// Serve built React app in production
+if (process.env.NODE_ENV === 'production' || !process.env.NODE_ENV) {
+    // Serve static files from build directory
+    app.use(express.static(path.join(__dirname, 'build')));
+    
+    // Handle React Router - serve index.html for all non-API routes
+    app.get('*', (req, res, next) => {
+        // Skip API routes
+        if (req.path.startsWith('/api/')) {
+            return next();
+        }
+        res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    });
+}
+
 // Temp directory
 const tempDir = path.join(__dirname, 'temp');
 if (!fs.existsSync(tempDir)) {

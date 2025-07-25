@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import PremiumSidebar from './layout/PremiumSidebar';
 import ImageCanvas from './editor/ImageCanvas';
+import FirstRunExperience from './FirstRunExperience';
 import { LicenseManager } from '../utils/licenseManager';
+import { usageLimiter } from '../services/usageLimiter.js';
 import '../styles/components.css';
 
 function App() {
@@ -13,8 +15,36 @@ function App() {
   const [processedImage, setProcessedImage] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedFormat, setProcessedFormat] = useState('png'); // Track the format of processed image
-  const [hasProLicense] = useState(LicenseManager.checkLicense());
+  const [hasProLicense, setHasProLicense] = useState(false);
   const [gifProgress, setGifProgress] = useState({ isCreating: false, progress: 0, message: '' });
+  const [showFirstRun, setShowFirstRun] = useState(false);
+
+  // Initialize usage limiter and check for first run
+  useEffect(() => {
+    // Make usage limiter globally available
+    window.usageLimiter = usageLimiter;
+    
+    // Check if this is first run
+    const hasSeenFirstRun = localStorage.getItem('snapforge_first_run_complete');
+    if (!hasSeenFirstRun) {
+      setShowFirstRun(true);
+    }
+    
+    // Check trial status
+    const trialStatus = usageLimiter.getTrialStatus();
+    console.log('🎯 Trial Status:', trialStatus);
+    
+    // Check for existing license
+    setHasProLicense(trialStatus.isLicensed);
+  }, []);
+
+  // Handle first run completion
+  const handleFirstRunComplete = (result) => {
+    localStorage.setItem('snapforge_first_run_complete', 'true');
+    setShowFirstRun(false);
+    setHasProLicense(result.licensed);
+    console.log('🎉 First run completed:', result);
+  };
 
   // Debug wrapper for setProcessedImage
   const handleSetProcessedImage = (image) => {
@@ -98,6 +128,10 @@ function App() {
 
   return (
     <div className="app">
+      {showFirstRun && (
+        <FirstRunExperience onComplete={handleFirstRunComplete} />
+      )}
+      
       <Header hasProLicense={hasProLicense} />
       
       <main className="main-content">

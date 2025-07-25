@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // License validation - read only with valid license key
+    match /licenses/{licenseKey} {
+      allow read: if request.auth == null; // Allow unauthenticated reads for license validation
+      allow write: if false; // Only admins can write (via Firebase Admin SDK)
+    }
+    
+    // Tools catalog - public read access
+    match /tools/{toolId} {
+      allow read: if true; // Public read access
+      allow write: if false; // Only admins can write
+    }
+    
+    // User sessions - private to authenticated users
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Analytics and usage tracking
+    match /analytics/{document=**} {
+      allow write: if true; // Allow anonymous usage tracking
+      allow read: if false; // Admin only
+    }
+  }
+}
