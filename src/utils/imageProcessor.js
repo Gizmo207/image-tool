@@ -27,10 +27,12 @@ export const imageProcessor = {
 
   // Professional AI-powered background removal (like remove.bg)
   async removeBackground(image, options = {}) {
-    console.log('🤖 Starting professional background removal...');
+    console.log('🤖 IMAGEPROCESSOR: Starting professional background removal...');
+    console.log('🤖 IMAGEPROCESSOR: Input image:', typeof image, image);
     
     try {
       // Use the professional AI-powered remover
+      console.log('🎯 IMAGEPROCESSOR: Calling professionalBackgroundRemover...');
       const result = await professionalBackgroundRemover.removeBackground(image, {
         onProgress: options.onProgress || ((key, current, total) => {
           const percent = Math.round((current / total) * 100);
@@ -45,20 +47,27 @@ export const imageProcessor = {
         })
       });
       
+      console.log('✅ IMAGEPROCESSOR: MediaPipe result:', typeof result, result ? 'HAS_RESULT' : 'NO_RESULT');
+      
       // Convert result to Image object for compatibility
       return new Promise((resolve) => {
         const processedImage = new Image();
         processedImage.onload = () => {
           processedImage.width = processedImage.naturalWidth;
           processedImage.height = processedImage.naturalHeight;
-          console.log('✅ Professional background removal complete');
+          console.log('✅ IMAGEPROCESSOR: Image object created successfully');
           resolve(processedImage);
         };
+        processedImage.onerror = (error) => {
+          console.error('❌ IMAGEPROCESSOR: Failed to create image object:', error);
+          resolve(processedImage); // Still resolve to avoid hanging
+        };
+        console.log('🔄 IMAGEPROCESSOR: Setting image src...');
         processedImage.src = result;
       });
       
     } catch (error) {
-      console.error('❌ Professional background removal failed:', error);
+      console.error('❌ IMAGEPROCESSOR: Professional background removal failed:', error);
       throw new Error(`Background removal failed: ${error.message}`);
     }
   },
@@ -236,14 +245,21 @@ export const imageProcessor = {
 
   // Comprehensive filter system with value-based adjustments
   async filter(image, filterType, value = null) {
-    console.log('🎨 Applying filter:', filterType, 'value:', value);
+    console.log('🎨 IMAGEPROCESSOR: Applying filter:', filterType, 'value:', value);
     
     // Handle special async cases first
     if (filterType === 'remove-bg') {
       try {
+        console.log('🎯 IMAGEPROCESSOR: Starting background removal...');
         const processedImage = await this.removeBackground(image);
-        return processedImage.src;
+        console.log('✅ IMAGEPROCESSOR: Background removal result:', typeof processedImage, processedImage);
+        
+        // processedImage is an Image object, so return its src
+        const result = processedImage.src;
+        console.log('✅ IMAGEPROCESSOR: Returning data URL:', result ? 'DATA_URL_PRESENT' : 'NO_DATA_URL');
+        return result;
       } catch (error) {
+        console.error('❌ IMAGEPROCESSOR: Background removal failed:', error);
         throw error;
       }
     }

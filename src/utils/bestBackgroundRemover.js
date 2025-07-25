@@ -1,4 +1,4 @@
-// Google MediaPipe Background Remover - The ONLY one we need!
+// Google MediaPipe Background Remover - SIMPLE & BULLETPROOF VERSION
 // Free forever, runs locally, better than remove.bg
 
 import { SelfieSegmentation } from '@mediapipe/selfie_segmentation';
@@ -7,121 +7,131 @@ export const bestBackgroundRemover = {
   selfieSegmentation: null,
   isInitialized: false,
 
-  // Initialize Google MediaPipe (one-time setup)
+  // Simple MediaPipe initialization
   async initialize() {
-    if (this.isInitialized) return;
+    if (this.isInitialized && this.selfieSegmentation) {
+      console.log('✅ MediaPipe already initialized');
+      return;
+    }
     
-    console.log('🏆 Initializing Google MediaPipe - The BEST background remover');
+    console.log('🏆 Starting Google MediaPipe - The BEST background remover');
     
     this.selfieSegmentation = new SelfieSegmentation({
-      locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
-      }
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
     });
 
-    // Configure for MAXIMUM quality
+    // Simple configuration for reliability
     this.selfieSegmentation.setOptions({
-      modelSelection: 1, // 1 = Best quality model
-      selfieMode: false,  // false = Better for all images (not just selfies)
-    });
-
-    this.selfieSegmentation.onResults((results) => {
-      this.handleResults(results);
+      modelSelection: 1,
+      selfieMode: false,
     });
 
     this.isInitialized = true;
-    console.log('✅ Google MediaPipe ready - Professional quality guaranteed');
+    console.log('✅ MediaPipe ready!');
   },
 
-  // Remove background with Google MediaPipe (the ONLY method we need)
+  // Simple background removal that WORKS
   async removeBackground(imageSource) {
-    console.log('🎯 Google MediaPipe processing - Professional results incoming...');
+    console.log('🎯 Starting MediaPipe processing...');
     
-    // Initialize MediaPipe
-    await this.initialize();
-
-    // Prepare image
-    const image = await this.prepareImage(imageSource);
-    
-    console.log('🔍 MediaPipe AI analyzing image structure...');
-    
-    // Process with MediaPipe magic
-    return new Promise((resolve, reject) => {
-      this.currentResolve = resolve;
-      this.currentReject = reject;
-      this.originalImage = image;
+    try {
+      // Initialize if needed
+      await this.initialize();
       
-      // Send to Google's AI
+      // Prepare image
+      const image = await this.loadImage(imageSource);
+      console.log('✅ Image loaded:', image.width + 'x' + image.height);
+      
+      // Process with MediaPipe - simple promise
+      const result = await this.processImage(image);
+      console.log('✅ MediaPipe SUCCESS!');
+      return result;
+      
+    } catch (error) {
+      console.error('❌ MediaPipe failed:', error);
+      throw new Error('Background removal failed: ' + error.message);
+    }
+  },
+
+  // Process image with MediaPipe
+  async processImage(image) {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('MediaPipe timeout'));
+      }, 15000);
+
+      // Set up result handler
+      this.selfieSegmentation.onResults((results) => {
+        clearTimeout(timeout);
+        try {
+          const processedImage = this.createTransparentBackground(image, results);
+          resolve(processedImage);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      // Send image to MediaPipe
       this.selfieSegmentation.send({ image: image });
     });
   },
 
-  // Handle MediaPipe results (where the magic happens)
-  handleResults(results) {
-    console.log('🎭 MediaPipe AI segmentation complete - Creating professional cutout...');
-    
+  // Create transparent background
+  createTransparentBackground(originalImage, results) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     
-    // Set canvas to match original image
-    canvas.width = this.originalImage.width || this.originalImage.videoWidth;
-    canvas.height = this.originalImage.height || this.originalImage.videoHeight;
+    canvas.width = originalImage.width;
+    canvas.height = originalImage.height;
     
     // Draw original image
-    ctx.drawImage(this.originalImage, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(originalImage, 0, 0);
     
-    // Get pixel data for mask processing
+    // Get image data
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
+    const mask = results.segmentationMask.data;
     
-    // Apply Google's AI segmentation mask
-    const maskData = results.segmentationMask.data;
-    
+    // Apply mask to make background transparent
     for (let i = 0; i < data.length; i += 4) {
       const pixelIndex = i / 4;
-      const maskValue = maskData[pixelIndex];
-      
-      // Google's mask: 255 = subject, 0 = background
-      if (maskValue < 128) {
-        // Background - make transparent
-        data[i + 3] = 0;
-      } else {
-        // Subject - keep with professional edge quality
-        data[i + 3] = Math.min(255, maskValue * 1.2); // Slight enhancement for crisp edges
+      if (mask[pixelIndex] < 128) {
+        data[i + 3] = 0; // Make background transparent
       }
     }
     
-    // Apply the processed data
     ctx.putImageData(imageData, 0, 0);
-    
-    const resultDataURL = canvas.toDataURL('image/png');
-    console.log('✅ Google MediaPipe complete - Professional quality guaranteed!');
-    
-    if (this.currentResolve) {
-      this.currentResolve(resultDataURL);
-    }
+    return canvas.toDataURL('image/png');
   },
 
-  // Prepare image for MediaPipe processing
-  async prepareImage(imageSource) {
-    if (imageSource instanceof HTMLImageElement) {
-      return imageSource;
-    }
+  // Simple image loader
+  async loadImage(source) {
+    if (source instanceof HTMLImageElement) return source;
+    if (source instanceof HTMLCanvasElement) return source;
     
-    if (imageSource instanceof HTMLCanvasElement) {
-      return imageSource;
-    }
-    
-    if (typeof imageSource === 'string') {
-      const image = new Image();
+    if (source instanceof File) {
+      const url = URL.createObjectURL(source);
+      const img = new Image();
       return new Promise((resolve, reject) => {
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-        image.crossOrigin = 'anonymous';
-        image.src = imageSource;
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve(img);
+        };
+        img.onerror = reject;
+        img.src = url;
       });
     }
     
-    throw new Error('Unsupported image source type');
+    if (typeof source === 'string') {
+      const img = new Image();
+      return new Promise((resolve, reject) => {
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.crossOrigin = 'anonymous';
+        img.src = source;
+      });
+    }
+    
+    throw new Error('Unsupported image type');
   }
 };

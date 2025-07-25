@@ -24,8 +24,6 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     
     /* Custom scrollbar styling */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(64, 224, 255, 0.5) rgba(15, 15, 35, 0.3);
 }
 
 /* Responsive design for smaller screens */

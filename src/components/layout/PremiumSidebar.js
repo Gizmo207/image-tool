@@ -293,34 +293,49 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   };
 
   const handleFilter = async (filterType) => {
-    if (!originalImage) return;
+    console.log('🚨 BUTTON CLICKED! Filter type:', filterType);
+    console.log('🚨 Original image:', originalImage ? 'EXISTS' : 'NO_IMAGE');
     
-    // Special handling for AI background removal
-    if (filterType === 'remove-bg') {
-      setShowBgRemovalProgress(true);
+    if (!originalImage) {
+      console.log('❌ No original image - returning early');
+      return;
     }
     
+    // Special handling for AI background removal - TEMPORARILY DISABLED PROGRESS
+    if (filterType === 'remove-bg') {
+      console.log('🎯 BACKGROUND REMOVAL DETECTED - progress DISABLED for testing');
+      // setShowBgRemovalProgress(true); // DISABLED FOR TESTING
+    }
+    
+    console.log('🔄 Setting isProcessing to true');
     setIsProcessing(true);
+    
     try {
+      console.log('🚀 CALLING imageProcessor.filter with:', { filterType, originalImage });
       const filteredDataUrl = await imageProcessor.filter(originalImage, filterType);
+      console.log('✅ Filter completed, result:', filteredDataUrl ? 'HAS_RESULT' : 'NO_RESULT');
+      
       setProcessedImage(filteredDataUrl);
       setProcessedFormat('png'); // Reset to PNG after filter
       
       // Hide progress indicator after completion
       if (filterType === 'remove-bg') {
         setTimeout(() => {
+          console.log('🔄 Hiding background removal progress');
           setShowBgRemovalProgress(false);
         }, 1500);
       }
     } catch (error) {
-      console.error('Filter failed:', error);
+      console.error('❌ FILTER FAILED:', error);
       alert(`Failed to apply ${filterType === 'remove-bg' ? 'AI background removal' : 'filter'}. Please try again.`);
       
       if (filterType === 'remove-bg') {
         setShowBgRemovalProgress(false);
       }
+    } finally {
+      console.log('🔄 Setting isProcessing to false');
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   const handleFormat = async (format) => {
@@ -788,10 +803,42 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
               
               <button 
                 className="tool-button"
-                onClick={() => handleFilter('remove-bg')}
-                disabled={isProcessing}
+                onClick={async () => {
+                  console.log('🚨 BACKGROUND REMOVAL BUTTON CLICKED!');
+                  
+                  if (!originalImage) {
+                    alert('Please upload an image first!');
+                    return;
+                  }
+                  
+                  try {
+                    setIsProcessing(true);
+                    console.log('✅ Processing started');
+                    
+                    console.log('🔄 Calling imageProcessor.filter...');
+                    const result = await imageProcessor.filter(originalImage, 'remove-bg');
+                    
+                    console.log('✅ Background removal completed!', result ? 'HAS_RESULT' : 'NO_RESULT');
+                    
+                    if (result) {
+                      setProcessedImage(result);
+                      setProcessedFormat('png');
+                      alert('Background removed successfully!');
+                    } else {
+                      alert('Background removal returned empty result');
+                    }
+                    
+                  } catch (error) {
+                    console.error('❌ Background removal failed:', error);
+                    alert('Background removal failed: ' + error.message);
+                  } finally {
+                    setIsProcessing(false);
+                    console.log('✅ Processing finished');
+                  }
+                }}
+                disabled={!originalImage || isProcessing}
               >
-                {isProcessing ? '🏆 Google AI Processing...' : '🏆 Remove Background'}
+                {isProcessing ? '🏆 Google AI Processing...' : '🏆 Remove Background (MediaPipe)'}
               </button>
             </div>
           </div>

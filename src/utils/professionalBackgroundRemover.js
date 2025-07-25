@@ -1,14 +1,18 @@
-// Google MediaPipe Background Remover - The ONLY one we need!
+// Google MediaPipe Background Remover - SIMPLE & RELIABLE
 import { bestBackgroundRemover } from './bestBackgroundRemover';
 
 export const professionalBackgroundRemover = {
-  // Use ONLY Google MediaPipe - the best free background removal
+  // Simple MediaPipe background removal that WORKS
   async removeBackground(imageSource, options = {}) {
-    console.log('🏆 Google MediaPipe - The BEST and ONLY background remover we need');
+    console.log('🏆 Google MediaPipe - Simple & Reliable (free forever!)');
     
-    // Only MediaPipe - no fallbacks needed, it's that good!
-    const result = await bestBackgroundRemover.removeBackground(imageSource);
-    console.log('✅ Google MediaPipe background removal complete');
-    return result;
+    try {
+      const result = await bestBackgroundRemover.removeBackground(imageSource);
+      console.log('✅ Background removal complete!');
+      return result;
+    } catch (error) {
+      console.error('❌ Background removal failed:', error);
+      throw new Error('Failed to remove background. Please try again.');
+    }
   }
 };
