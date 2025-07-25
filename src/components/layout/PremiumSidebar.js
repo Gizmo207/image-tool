@@ -17,6 +17,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const [selectedFormat, setSelectedFormat] = useState('');
   const [conversionSuccess, setConversionSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [originalFile, setOriginalFile] = useState(null); // Store original file for GIF conversion
   const fileInputRef = useRef(null);
 
   // Update custom dimensions when image changes
@@ -29,13 +30,21 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
 
   const handleFileSelect = (file) => {
     console.log('🎯 PremiumSidebar: File selected:', file);
-    if (file && file.type.startsWith('image/')) {
-      console.log('✅ Valid image file, calling onImageUpload');
+    
+    // Accept both images and videos for GIF conversion
+    const isValidFile = file && (
+      file.type.startsWith('image/') || 
+      file.type.startsWith('video/')
+    );
+    
+    if (isValidFile) {
+      console.log('✅ Valid file, calling onImageUpload');
+      setOriginalFile(file); // Store the original file
       onImageUpload(file);
       setActiveTab('resize');
     } else {
       console.log('❌ Invalid file type:', file?.type);
-      alert('Please select a valid image file (JPG, PNG, GIF, WebP)');
+      alert('Please select a valid image file (JPG, PNG, GIF, WebP) or video file for GIF conversion');
     }
   };
 
@@ -96,13 +105,26 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     setIsProcessing(true);
     setConversionSuccess(false);
     try {
-      const convertedDataUrl = await imageProcessor.convert(originalImage, selectedFormat);
+      let convertedDataUrl;
+      
+      // Handle GIF conversion specially for video files or image files
+      if (selectedFormat.toLowerCase() === 'gif' && originalFile) {
+        convertedDataUrl = await imageProcessor.convertToGif(originalFile);
+      } else {
+        convertedDataUrl = await imageProcessor.convert(originalImage, selectedFormat);
+      }
+      
       setProcessedImage(convertedDataUrl);
       setProcessedFormat(selectedFormat); // Update the format state
       
       // Show success feedback
       setConversionSuccess(true);
-      setSuccessMessage(`✨ Successfully converted to ${selectedFormat.toUpperCase()}! Your image is ready to download. 📥`);
+      
+      if (selectedFormat.toLowerCase() === 'gif' && originalFile?.type.startsWith('video/')) {
+        setSuccessMessage(`✨ Successfully converted video to animated GIF! Your GIF is ready to download. 📥`);
+      } else {
+        setSuccessMessage(`✨ Successfully converted to ${selectedFormat.toUpperCase()}! Your image is ready to download. 📥`);
+      }
       
       // Auto-hide success message after 5 seconds
       setTimeout(() => {
@@ -174,7 +196,8 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
               {originalImage ? 'Image Loaded - Upload New' : 'Drop image here or click to browse'}
             </div>
             <div className="upload-hint">
-              Supports JPG, PNG, GIF, WebP up to 10MB
+              Supports JPG, PNG, GIF, WebP images up to 10MB<br/>
+              <strong>New:</strong> Upload video files for animated GIF creation!
             </div>
             
             {!originalImage && (

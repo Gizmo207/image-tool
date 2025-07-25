@@ -1,5 +1,6 @@
 // Image processing utilities
 import { canvasHelpers } from './canvasHelpers';
+import { gifCreator } from './gifCreator.js';
 
 export const imageProcessor = {
   // Resize an image to new dimensions
@@ -173,8 +174,15 @@ export const imageProcessor = {
 
   // Convert image to different format
   convert(image, format) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
+        // Handle GIF conversion specially
+        if (format.toLowerCase() === 'gif') {
+          const gifDataUrl = await gifCreator.createStaticGif(image);
+          resolve(gifDataUrl);
+          return;
+        }
+
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
@@ -228,5 +236,37 @@ export const imageProcessor = {
         reject(error);
       }
     });
+  },
+
+  // Convert file to GIF (handles both images and videos)
+  async convertToGif(file) {
+    if (gifCreator.isVideoFile(file)) {
+      // Convert video to animated GIF
+      const videoInfo = await gifCreator.getVideoInfo(file);
+      const options = {
+        startTime: 0,
+        duration: Math.min(videoInfo.duration, 10), // Max 10 seconds
+        fps: 10,
+        width: Math.min(videoInfo.width, 480), // Max width 480px
+        height: Math.min(videoInfo.height, 360) // Max height 360px
+      };
+      
+      return await gifCreator.createGifFromVideo(file, options);
+    } else {
+      // Convert static image to GIF
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = async () => {
+          try {
+            const gifDataUrl = await gifCreator.createStaticGif(img);
+            resolve(gifDataUrl);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      });
+    }
   }
 };
