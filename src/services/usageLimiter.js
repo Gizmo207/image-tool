@@ -9,9 +9,10 @@ class SnapForgeUsageLimiter {
     this.storageKey = 'snapforge_usage_data';
     this.trialLimits = {
       'background-removal': 1,
-      'resize': 2,
+      'resize': 1, // Changed from 2 to 1 for proper trial flow
       'gif-creator': 1,
-      'filters': 3,
+      'filters': 1, // Changed from 3 to 1 for proper trial flow
+      'format': 1, // Added format converter with 1 free use
       'batch-resize': 1
     };
     this.usageData = this.loadUsageData();

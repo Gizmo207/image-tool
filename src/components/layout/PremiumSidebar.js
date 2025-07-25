@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { imageProcessor } from '../../utils/imageProcessor';
 import GifCreatorInterface from '../gif/GifCreatorInterface';
-import BackgroundRemovalProgress from '../ui/BackgroundRemovalProgress';
 import './PremiumSidebar.css';
 import '../gif/GifCreatorInterface.css';
 
@@ -26,6 +25,8 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const [isVideoFile, setIsVideoFile] = useState(false); // Track if uploaded file is video
   const [isGifCreating, setIsGifCreating] = useState(false); // Track if GIF is being created
   const [showBgRemovalProgress, setShowBgRemovalProgress] = useState(false); // Track background removal progress
+  const [usageLimiterReady, setUsageLimiterReady] = useState(false); // Track usageLimiter initialization
+  const [videoFile, setVideoFile] = useState(null); // Track uploaded video file for GIF creation
   const fileInputRef = useRef(null);
   
   // Collapsible tool card states
@@ -43,6 +44,83 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     contrast: 0,   // -100 to +100
     saturation: 0  // -100 to +100
   });
+
+  // Compute locked tools status from usageLimiter
+  const getLockedToolsStatus = () => {
+    if (!window.usageLimiter) {
+      return {
+        resize: { locked: false },
+        filters: { locked: false },
+        format: { locked: false },
+        gifCreator: { locked: false },
+        backgroundRemoval: { locked: false }
+      };
+    }
+
+    const resizeStatus = window.usageLimiter.canUseTool('resize');
+    const filtersStatus = window.usageLimiter.canUseTool('filters');
+    const formatStatus = window.usageLimiter.canUseTool('format');
+    const gifStatus = window.usageLimiter.canUseTool('gif-creator');
+    const bgRemovalStatus = window.usageLimiter.canUseTool('background-removal');
+    
+    return {
+      resize: {
+        locked: !resizeStatus.allowed,
+        upgradePrompt: resizeStatus.allowed ? null : {
+          title: 'Resize Tool Trial Exhausted',
+          message: 'You\'ve used your free resize. Get unlimited resizing with Pro.',
+          cta: 'Unlock Unlimited Resizing'
+        }
+      },
+      filters: {
+        locked: !filtersStatus.allowed,
+        upgradePrompt: filtersStatus.allowed ? null : {
+          title: 'Filters Trial Exhausted',
+          message: 'You\'ve used your free filter. Get unlimited filters with Pro.',
+          cta: 'Unlock All Premium Filters'
+        }
+      },
+      format: {
+        locked: !formatStatus.allowed,
+        upgradePrompt: formatStatus.allowed ? null : {
+          title: 'Format Converter Trial Exhausted',
+          message: 'You\'ve used your free conversion. Get unlimited conversions with Pro.',
+          cta: 'Unlock Unlimited Conversions'
+        }
+      },
+      gifCreator: {
+        locked: !gifStatus.allowed,
+        upgradePrompt: gifStatus.allowed ? null : {
+          title: 'GIF Creator Trial Exhausted',
+          message: 'You\'ve used your free GIF creation. Get unlimited GIF creation with Pro.',
+          cta: 'Unlock Unlimited GIF Creation'
+        }
+      },
+      backgroundRemoval: {
+        locked: !bgRemovalStatus.allowed,
+        upgradePrompt: bgRemovalStatus.allowed ? null : {
+          title: 'Background Removal Trial Exhausted',
+          message: 'You\'ve used your free background removal. Get unlimited removals with Pro.',
+          cta: 'Unlock Unlimited Background Removal'
+        }
+      }
+    };
+  };
+
+  const lockedTools = getLockedToolsStatus();
+
+  // Check for usageLimiter initialization
+  useEffect(() => {
+    const checkUsageLimiter = () => {
+      if (window.usageLimiter) {
+        setUsageLimiterReady(true);
+      } else {
+        // Check again in 100ms if not ready
+        setTimeout(checkUsageLimiter, 100);
+      }
+    };
+    checkUsageLimiter();
+  }, []);
 
   // Update custom dimensions when image changes
   useEffect(() => {
@@ -76,11 +154,25 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const handleFilterWithValue = async (filterType, value) => {
     if (!originalImage) return;
     
+    // Check trial limits for filters
+    if (window.usageLimiter && ['brightness', 'contrast', 'saturation', 'vintage', 'vibrant', 'dramatic', 'dreamy', 'blur', 'sharp', 'grayscale'].includes(filterType)) {
+      const canUse = window.usageLimiter.canUseTool('filters');
+      if (!canUse.allowed) {
+        alert('Trial limit reached! You\'ve used your free filter. Upgrade to Pro for unlimited filters.');
+        return;
+      }
+    }
+    
     setIsProcessing(true);
     
     try {
       const filteredImage = await imageProcessor.filter(originalImage, filterType, value);
       setProcessedImage(filteredImage);
+      
+      // Record usage for filters (not adjustments)
+      if (window.usageLimiter && ['vintage', 'vibrant', 'dramatic', 'dreamy', 'blur', 'sharp', 'grayscale'].includes(filterType)) {
+        window.usageLimiter.recordUsage('filters', { filterType, value });
+      }
     } catch (error) {
       console.error('Filter error:', error);
     } finally {
@@ -164,244 +256,144 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     setIsProcessing(false);
   };
 
-  const handleCustomResize = () => {
-    const width = parseInt(customWidth);
-    const height = parseInt(customHeight);
-    
-    if (width > 0 && height > 0 && width <= 4000 && height <= 4000) {
-      handleResize(width, height);
-    } else {
-      alert('Please enter valid dimensions (1-4000 pixels)');
-    }
-  };
+const handleCustomResize = () => {
+  const width = parseInt(customWidth);
+  const height = parseInt(customHeight);
+  
+  if (width && height && width > 0 && height > 0) {
+    handleResize(width, height);
+  } else {
+    alert('Please enter valid dimensions (1-4000 pixels)');
+  }
+};
 
-  const handleFormatSelect = (format) => {
-    setSelectedFormat(format);
-  };
+const handleFormatSelect = (format) => {
+  setSelectedFormat(format);
+};
 
-  const handleFormatConvert = async () => {
-    if (!originalImage || !selectedFormat) return;
-    
-    console.log('🚀 Starting format conversion:', {
-      format: selectedFormat,
-      hasOriginalFile: !!originalFile,
-      originalFileType: originalFile?.type,
-      imageSize: originalImage ? `${originalImage.width}x${originalImage.height}` : 'unknown'
-    });
-    
-    setIsProcessing(true);
-    setConversionSuccess(false);
-    setProcessingStatus('Initializing conversion...');
-    
-    // Set up timeout monitoring
-    const timeout = setTimeout(() => {
-      console.warn('⚠️ Processing taking longer than expected...');
-      setProcessingStatus('Processing is taking longer than expected. Please check console for details.');
-    }, 10000);
-    
-    setProcessingTimeout(timeout);
-    
-    try {
-      let convertedDataUrl;
-      
-      // Handle GIF conversion - only for video files
-      if (selectedFormat.toLowerCase() === 'gif') {
-        // Check if we have a video file available
-        const videoFile = originalImage?.originalVideoFile || originalFile;
-        
-        if (!videoFile || !videoFile.type.startsWith('video/')) {
-          throw new Error('GIF conversion is only available for video files. Please upload a video file first.');
-        }
-        
-        console.log('🎬 Converting video to image using original video file:', {
-          fileName: videoFile.name,
-          fileSize: Math.round(videoFile.size / 1024) + 'KB',
-          fileType: videoFile.type
-        });
-        
-        setProcessingStatus('📹 Loading video...');
-        await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UI update
-        
-        setProcessingStatus('🎬 Extracting frame from video...');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setProcessingStatus('⚙️ Processing video frame...');
-        
-        try {
-          console.log('🔧 Calling imageProcessor.convertToGif (now creates static image)...');
-          convertedDataUrl = await imageProcessor.convertToGif(videoFile);
-          console.log('✅ Video frame extraction completed successfully:', {
-            dataUrlSize: convertedDataUrl?.length || 0,
-            dataUrlPrefix: convertedDataUrl?.substring(0, 50) || 'EMPTY'
-          });
-          
-          if (!convertedDataUrl) {
-            throw new Error('Video frame extraction returned empty result');
-          }
-          
-        } catch (videoError) {
-          console.error('❌ Detailed video processing error:', {
-            error: videoError,
-            message: videoError.message,
-            stack: videoError.stack,
-            videoFile: {
-              name: videoFile.name,
-              size: videoFile.size,
-              type: videoFile.type
-            }
-          });
-          throw gifError;
-        }
-        
-      } else {
-        console.log('🖼️ Converting to standard format...');
-        setProcessingStatus(`Converting to ${selectedFormat.toUpperCase()}...`);
-        
-        convertedDataUrl = await imageProcessor.convert(originalImage, selectedFormat);
-        console.log('✅ Standard format conversion completed');
-      }
-      
-      clearTimeout(timeout);
-      setProcessingStatus('Finalizing...');
-      
-      setProcessedImage(convertedDataUrl);
-      setProcessedFormat(selectedFormat); // Update the format state
-      
-      // Show success feedback
-      setConversionSuccess(true);
-      
-      if (selectedFormat.toLowerCase() === 'gif') {
-        setSuccessMessage(`✨ Successfully extracted frame from video! Your image is ready to download. 📥`);
-        console.log('🎉 Video frame extraction successful!');
-      } else {
-        setSuccessMessage(`✨ Successfully converted to ${selectedFormat.toUpperCase()}! Your image is ready to download. 📥`);
-        console.log('🎉 Format conversion successful!');
-      }
-      
-      // Auto-hide success message after 5 seconds
-      setTimeout(() => {
-        setConversionSuccess(false);
-        setSuccessMessage('');
-      }, 5000);
-      
-    } catch (error) {
-      clearTimeout(timeout);
-      console.error('❌ Format conversion failed:', error);
-      
-      let errorMessage = 'Failed to convert format. ';
-      
-      if (error.message.includes('timeout')) {
-        errorMessage += 'The process timed out - try a smaller file or shorter video.';
-      } else if (error.message.includes('corrupted')) {
-        errorMessage += 'The file appears to be corrupted or in an unsupported format.';
-      } else if (error.message.includes('memory')) {
-        errorMessage += 'Not enough memory - try a smaller file.';
-      } else {
-        errorMessage += 'Please check the console for details and try again.';
-      }
-      
-      alert(errorMessage);
-      setProcessingStatus('');
-    } finally {
-      setIsProcessing(false);
-      setProcessingStatus('');
-      if (processingTimeout) {
-        clearTimeout(processingTimeout);
-        setProcessingTimeout(null);
-      }
-    }
-  };
-
-  const handleFilter = async (filterType) => {
-    console.log('🚨 BUTTON CLICKED! Filter type:', filterType);
-    console.log('🚨 Original image:', originalImage ? 'EXISTS' : 'NO_IMAGE');
-    
-    if (!originalImage) {
-      console.log('❌ No original image - returning early');
+const handleFormatConvert = async () => {
+  if (!selectedFormat || !originalImage) return;
+  
+  // Check trial limits
+  if (window.usageLimiter) {
+    const canUse = window.usageLimiter.canUseTool('format');
+    if (!canUse.allowed) {
+      alert('Trial limit reached! You\'ve used your free format conversion. Upgrade to Pro for unlimited conversions.');
       return;
     }
+  }
+  
+  setIsProcessing(true);
+  setProcessingStatus('Initializing conversion...');
+  setConversionSuccess(false);
+  
+  // Clear any existing timeout
+  if (processingTimeout) {
+    clearTimeout(processingTimeout);
+  }
+  
+  try {
+    setProcessingStatus(`Converting to ${selectedFormat.toUpperCase()}...`);
     
-    // Special handling for AI background removal with trial limits
-    if (filterType === 'remove-bg') {
-      console.log('🎯 BACKGROUND REMOVAL DETECTED');
-      
-      // Check trial usage before proceeding
-      const canUse = window.usageLimiter?.canUseTool('background-removal');
-      if (canUse && !canUse.allowed) {
-        // Lock the tool elegantly
-        setLockedTools(prev => ({
-          ...prev,
-          backgroundRemoval: {
-            locked: true,
-            reason: canUse.reason,
-            upgradePrompt: window.usageLimiter.getUpgradePrompt('background-removal')
-          }
-        }));
-        
-        // Auto-collapse the card
-        setExpandedCards(prev => ({ ...prev, backgroundRemoval: false }));
+    const convertedDataUrl = await imageProcessor.convert(originalImage, selectedFormat);
+    
+    setProcessingStatus('Finalizing...');
+    setProcessedImage(convertedDataUrl);
+    setProcessedFormat(selectedFormat);
+    
+    // Record usage
+    if (window.usageLimiter) {
+      window.usageLimiter.recordUsage('format', { format: selectedFormat });
+    }
+    
+    // Show success message
+    setSuccessMessage(`✅ Successfully converted to ${selectedFormat.toUpperCase()}!`);
+    setConversionSuccess(true);
+    
+    // Auto-hide success message after 3 seconds
+    const timeout = setTimeout(() => {
+      setConversionSuccess(false);
+      setSuccessMessage('');
+    }, 3000);
+    setProcessingTimeout(timeout);
+    
+  } catch (error) {
+    console.error('Format conversion failed:', error);
+    setProcessingStatus('');
+    
+    // More specific error messages
+    if (error.message.includes('canvas')) {
+      alert('⚠️ Canvas error during conversion. Try with a smaller image or different format.');
+    } else if (error.message.includes('memory')) {
+      alert('⚠️ Not enough memory for conversion. Try with a smaller image.');
+    } else {
+      alert(`❌ Failed to convert to ${selectedFormat}. Please try again or choose a different format.`);
+    }
+  } finally {
+    setIsProcessing(false);
+    setProcessingStatus('');
+  }
+};
+
+const handleFilter = async (filterType) => {
+    if (!originalImage) return;
+    
+    // Check trial limits for filters
+    if (window.usageLimiter) {
+      const canUse = window.usageLimiter.canUseTool('filters');
+      if (!canUse.allowed) {
+        alert('Trial limit reached! You\'ve used your free filter. Upgrade to Pro for unlimited filters.');
         return;
       }
     }
     
-    console.log('🔄 Setting isProcessing to true');
     setIsProcessing(true);
-    
     try {
-      console.log('🚀 CALLING imageProcessor.filter with:', { filterType, originalImage });
       const filteredDataUrl = await imageProcessor.filter(originalImage, filterType);
-      console.log('✅ Filter completed, result:', filteredDataUrl ? 'HAS_RESULT' : 'NO_RESULT');
-      
       setProcessedImage(filteredDataUrl);
-      setProcessedFormat('png'); // Reset to PNG after filter
+      setProcessedFormat('png');
       
-      // Record usage for background removal
-      if (filterType === 'remove-bg' && window.usageLimiter) {
-        const result = window.usageLimiter.recordUsage('background-removal', {
-          filterType: filterType
-        });
-        console.log('✅ Background removal usage recorded:', result);
-        
-        // Check if this was the last allowed use
-        const newCanUse = window.usageLimiter.canUseTool('background-removal');
-        if (!newCanUse.allowed) {
-          // Lock the tool after this use with delay to show result first
-          setTimeout(() => {
-            setLockedTools(prev => ({
-              ...prev,
-              backgroundRemoval: {
-                locked: true,
-                reason: newCanUse.reason,
-                upgradePrompt: window.usageLimiter.getUpgradePrompt('background-removal')
-              }
-            }));
-            setExpandedCards(prev => ({ ...prev, backgroundRemoval: false }));
-          }, 2000); // Give user time to see the result
-        }
+      // Record usage
+      if (window.usageLimiter) {
+        window.usageLimiter.recordUsage('filters', { filterType });
       }
-      
     } catch (error) {
-      console.error('❌ FILTER FAILED:', error);
-      console.log('Background removal failed:', error.message);
+      console.error('Filter failed:', error);
+      alert('Failed to apply filter. Please try again.');
     } finally {
-      console.log('🔄 Setting isProcessing to false');
       setIsProcessing(false);
     }
   };
 
-  const handleFormat = async (format) => {
+  // Specific handler for background removal
+  const handleBackgroundRemoval = async () => {
     if (!originalImage) return;
+    
+    // Check trial limits specifically for background removal
+    if (window.usageLimiter) {
+      const canUse = window.usageLimiter.canUseTool('background-removal');
+      if (!canUse.allowed) {
+        alert('Trial limit reached! You\'ve used your free background removal. Upgrade to Pro for unlimited background removal.');
+        return;
+      }
+    }
     
     setIsProcessing(true);
     try {
-      const convertedDataUrl = await imageProcessor.convert(originalImage, format);
-      setProcessedImage(convertedDataUrl);
-      setProcessedFormat(format); // Update format
+      const filteredDataUrl = await imageProcessor.filter(originalImage, 'remove-bg');
+      setProcessedImage(filteredDataUrl);
+      setProcessedFormat('png');
+      
+      // Record usage for background removal specifically
+      if (window.usageLimiter) {
+        window.usageLimiter.recordUsage('background-removal', { filterType: 'remove-bg' });
+      }
     } catch (error) {
-      console.error('Format conversion failed:', error);
-      alert('Failed to convert format. Please try again.');
+      console.error('Background removal failed:', error);
+      alert('Failed to remove background. Please try again.');
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   return (
@@ -456,22 +448,24 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
 
         {originalImage && (
           <div className="tools-container">
-            <div className="tool-card">
+            <div className={`tool-card ${lockedTools.resize?.locked ? 'locked' : ''}`}>
               <div 
                 className="tool-header clickable"
-                onClick={() => toggleCard('resize')}
+                onClick={() => lockedTools.resize?.locked ? null : toggleCard('resize')}
               >
                 <div className="tool-icon">📷</div>
                 <div className="tool-info">
-                  <h3>Social Media Resize</h3>
-                  <p>Perfect sizes for Instagram, Facebook, Twitter and Discord</p>
+                  <h3>Social Media Resize {lockedTools.resize?.locked && '🔒'}</h3>
+                  <p>{lockedTools.resize?.locked ? 'Trial exhausted - Upgrade for unlimited resizing' : 'Perfect sizes for Instagram, Facebook, Twitter and Discord'}</p>
                 </div>
-                <div className={`expand-arrow ${expandedCards.resize ? 'expanded' : ''}`}>
-                  ▼
-                </div>
+                {!lockedTools.resize?.locked && (
+                  <div className={`expand-arrow ${expandedCards.resize ? 'expanded' : ''}`}>
+                    ▼
+                  </div>
+                )}
               </div>
               
-              {expandedCards.resize && (
+              {expandedCards.resize && !lockedTools.resize?.locked && (
                 <div className="tool-content">
                   <div className="preset-grid">
                     <button className="preset-btn" onClick={() => handleResize(1080, 1080)}>
@@ -496,7 +490,6 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                     </button>
                   </div>
                   
-                  {/* Custom Size Inputs */}
                   <div className="custom-resize-section">
                     <h4>✏️ Custom Size</h4>
                     <div className="custom-inputs">
@@ -530,7 +523,6 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                         </div>
                       </div>
                       
-                      {/* Final Dimensions Display */}
                       <div className="final-dimensions">
                         <span className="dimensions-label">Final Size:</span>
                         <span className="dimensions-value">
@@ -541,7 +533,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                       <button 
                         className="custom-resize-btn"
                         onClick={handleCustomResize}
-                        disabled={!customWidth || !customHeight || customWidth === originalImage?.width.toString() && customHeight === originalImage?.height.toString()}
+                        disabled={!customWidth || !customHeight}
                       >
                         ✅ Apply Custom Size
                       </button>
@@ -549,24 +541,34 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                   </div>
                 </div>
               )}
+              
+              {lockedTools.resize?.locked && (
+                <div className="upgrade-prompt">
+                  <h4>🔒 Resize Tool Locked</h4>
+                  <p>You've used your free resize. Upgrade to Pro for unlimited resizing!</p>
+                  <button className="upgrade-btn">Unlock Unlimited Resizing</button>
+                </div>
+              )}
             </div>
 
-            <div className="tool-card">
+            <div className={`tool-card ${lockedTools.format?.locked ? 'locked' : ''}`}>
               <div 
                 className="tool-header clickable"
-                onClick={() => toggleCard('format')}
+                onClick={() => lockedTools.format?.locked ? null : toggleCard('format')}
               >
                 <div className="tool-icon">🔄</div>
                 <div className="tool-info">
-                  <h3>Format Converter</h3>
-                  <p>Convert between PNG, JPG, WebP, BMP, and TIFF formats</p>
+                  <h3>Format Converter {lockedTools.format?.locked && '🔒'}</h3>
+                  <p>{lockedTools.format?.locked ? 'Trial exhausted - Upgrade for unlimited conversions' : 'Convert between PNG, JPG, WebP, BMP, and TIFF formats'}</p>
                 </div>
-                <div className={`expand-arrow ${expandedCards.format ? 'expanded' : ''}`}>
-                  ▼
-                </div>
+                {!lockedTools.format?.locked && (
+                  <div className={`expand-arrow ${expandedCards.format ? 'expanded' : ''}`}>
+                    ▼
+                  </div>
+                )}
               </div>
               
-              {expandedCards.format && (
+              {expandedCards.format && !lockedTools.format?.locked && (
                 <div className="tool-content">
                   <div className="format-buttons">
                     <button 
@@ -634,65 +636,35 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                   )}
                 </div>
               )}
-            </div>
-
-            {/* GIF Creator - Standalone Tool with Advanced Interface */}
-            <div className={`tool-card ${isGifCreating ? 'gif-creating' : ''}`}>
-              <div 
-                className="tool-header clickable"
-                onClick={() => toggleCard('gifCreator')}
-              >
-                <div className="tool-icon">🎬</div>
-                <div className="tool-info">
-                  <h3>GIF Creator</h3>
-                  <p>Create animated GIFs from your videos with full control</p>
-                </div>
-                <div className={`expand-arrow ${expandedCards.gifCreator ? 'expanded' : ''}`}>
-                  ▼
-                </div>
-              </div>
               
-              {expandedCards.gifCreator && (
-                <div className="tool-content">
-                  <GifCreatorInterface
-                    videoFile={originalImage?.originalVideoFile || originalFile}
-                    onGifCreated={(gifDataUrl) => {
-                      console.log('✅ GIF created successfully');
-                      setProcessedImage(gifDataUrl);
-                      setProcessedFormat('gif');
-                      setIsGifCreating(false);
-                    }}
-                    onError={(errorMessage) => {
-                      console.error('❌ GIF creation error:', errorMessage);
-                      alert('GIF creation failed: ' + errorMessage);
-                      setIsGifCreating(false);
-                    }}
-                    onProgressUpdate={(progressData) => {
-                      setIsGifCreating(progressData.isCreating);
-                      onGifProgressUpdate?.(progressData);
-                    }}
-                  />
+              {lockedTools.format?.locked && (
+                <div className="upgrade-prompt">
+                  <h4>🔒 Format Converter Locked</h4>
+                  <p>You've used your free conversion. Upgrade to Pro for unlimited conversions!</p>
+                  <button className="upgrade-btn">Unlock Unlimited Conversions</button>
                 </div>
               )}
             </div>
 
-            {/* Unified Color Tools Card */}
-            <div className="tool-card">
+            {/* Color & Filter Tools */}
+            <div className={`tool-card ${lockedTools.filters?.locked ? 'locked' : ''}`}>
               <div 
                 className="tool-header clickable"
-                onClick={() => toggleCard('colorTools')}
+                onClick={() => lockedTools.filters?.locked ? null : toggleCard('colorTools')}
               >
                 <div className="tool-icon">🎨</div>
                 <div className="tool-info">
-                  <h3>Color & Filter Tools</h3>
-                  <p>Professional filters, adjustments, and effects</p>
+                  <h3>Color & Filter Tools {lockedTools.filters?.locked && '🔒'}</h3>
+                  <p>{lockedTools.filters?.locked ? 'Trial exhausted - Upgrade for unlimited filters' : 'Professional filters, adjustments, and effects'}</p>
                 </div>
-                <div className={`expand-arrow ${expandedCards.colorTools ? 'expanded' : ''}`}>
-                  ▼
-                </div>
+                {!lockedTools.filters?.locked && (
+                  <div className={`expand-arrow ${expandedCards.colorTools ? 'expanded' : ''}`}>
+                    ▼
+                  </div>
+                )}
               </div>
               
-              {expandedCards.colorTools && (
+              {expandedCards.colorTools && !lockedTools.filters?.locked && (
                 <div className="tool-content">
                   {/* Fine-Tuning Color Adjustments */}
                   <div className="adjustment-section">
@@ -840,6 +812,14 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                   </div>
                 </div>
               )}
+              
+              {lockedTools.filters?.locked && (
+                <div className="upgrade-prompt">
+                  <h4>🔒 Filters Locked</h4>
+                  <p>You've used your free filter. Upgrade to Pro for unlimited filters!</p>
+                  <button className="upgrade-btn">Unlock All Premium Filters</button>
+                </div>
+              )}
             </div>
 
             {/* AI Background Removal with Trial Limits */}
@@ -896,7 +876,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                   
                   <button 
                     className={`tool-button ${isProcessing ? 'processing' : 'ready'}`}
-                    onClick={() => handleFilter('remove-bg')}
+                    onClick={handleBackgroundRemoval}
                     disabled={!originalImage || isProcessing}
                   >
                     {isProcessing ? '🧠 SMART AI Processing...' : '🚀 SMART Background Removal'}
@@ -904,8 +884,105 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                 </div>
               )}
             </div>
+
+            {/* GIF Creator Tool */}
+            <div className={`tool-card ${lockedTools.gifCreator?.locked ? 'locked' : ''}`}>
+              <div 
+                className="tool-header clickable"
+                onClick={() => lockedTools.gifCreator?.locked ? null : toggleCard('gifCreator')}
+              >
+                <div className="tool-icon">
+                  {lockedTools.gifCreator?.locked ? '🔒' : '🎬'}
+                </div>
+                <div className="tool-info">
+                  <h3>
+                    GIF Creator
+                    {lockedTools.gifCreator?.locked && <span className="lock-badge">TRIAL LIMIT REACHED</span>}
+                  </h3>
+                  <p>
+                    {lockedTools.gifCreator?.locked 
+                      ? lockedTools.gifCreator.upgradePrompt?.message || "Upgrade for unlimited GIF creation"
+                      : "Create animated GIFs from videos and image sequences"
+                    }
+                  </p>
+                </div>
+                <div className={`expand-arrow ${expandedCards.gifCreator ? 'expanded' : ''} ${lockedTools.gifCreator?.locked ? 'locked' : ''}`}>
+                  {lockedTools.gifCreator?.locked ? '🔒' : '▼'}
+                </div>
+              </div>
+              
+              {lockedTools.gifCreator?.locked ? (
+                <div className="premium-upgrade-panel">
+                  <div className="upgrade-content">
+                    <div className="upgrade-icon">🎬</div>
+                    <h4>{lockedTools.gifCreator.upgradePrompt?.title}</h4>
+                    <p>{lockedTools.gifCreator.upgradePrompt?.message}</p>
+                    <button className="premium-upgrade-button">
+                      {lockedTools.gifCreator.upgradePrompt?.cta || 'Unlock Unlimited GIF Creation'}
+                    </button>
+                  </div>
+                </div>
+              ) : expandedCards.gifCreator && (
+                <div className="tool-content">
+                  <div className="gif-creator-section">
+                    <h4 style={{ color: '#40e0ff', fontSize: '14px', marginBottom: '10px' }}>
+                      🎬 GIF Creator - Upload Video
+                    </h4>
+                    <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.4', marginBottom: '15px' }}>
+                      <div style={{ marginBottom: '8px' }}>✅ Convert videos to optimized GIFs</div>
+                      <div style={{ marginBottom: '8px' }}>✅ Adjustable frame rate and quality</div>
+                      <div style={{ marginBottom: '8px' }}>✅ Custom duration and size settings</div>
+                      <div style={{ marginBottom: '8px' }}>✅ Smart compression algorithms</div>
+                    </div>
+                    
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          // Check trial limits before proceeding
+                          if (window.usageLimiter) {
+                            const canUse = window.usageLimiter.canUseTool('gif-creator');
+                            if (!canUse.allowed) {
+                              alert('Trial limit reached! You\'ve used your free GIF creation. Upgrade to Pro for unlimited GIF creation.');
+                              e.target.value = ''; // Clear the input
+                              return;
+                            }
+                          }
+                          setVideoFile(file);
+                        }
+                      }}
+                      style={{ marginBottom: '15px', width: '100%' }}
+                    />
+                    
+                    {videoFile && (
+                      <GifCreatorInterface 
+                        videoFile={videoFile}
+                        onGifCreated={(gifDataUrl) => {
+                          setProcessedImage(gifDataUrl);
+                          setProcessedFormat('gif');
+                          
+                          // Record usage for GIF creator
+                          if (window.usageLimiter) {
+                            window.usageLimiter.recordUsage('gif-creator', { source: 'video' });
+                          }
+                        }}
+                        onProgressUpdate={onGifProgressUpdate}
+                        onError={(error) => {
+                          console.error('GIF creation error:', error);
+                          alert('Failed to create GIF: ' + error);
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
+
+
 
         <section className="upgrade-section">
           <div className="upgrade-card">
@@ -916,11 +993,6 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
         </section>
       </div>
 
-      {/* Professional Background Removal Progress */}
-      <BackgroundRemovalProgress 
-        isVisible={showBgRemovalProgress}
-        onComplete={() => setShowBgRemovalProgress(false)}
-      />
     </div>
   );
 };

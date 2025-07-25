@@ -11,9 +11,9 @@
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
-  min-height: 100vh; /* Changed back to min-height */
+  height: 100vh; /* Fixed height to viewport */
   color: #ffffff;
-  overflow-x: hidden; /* Only prevent horizontal scrolling */
+  overflow: hidden; /* Prevent ALL scrolling */
 }
 
 /* Smooth scrolling */
@@ -22,36 +22,40 @@ html {
 }
 
 #root {
-  min-height: 100vh; /* Changed back to min-height */
+  height: 100vh; /* Fixed height to viewport */
   display: flex;
   flex-direction: column;
-  overflow-x: hidden; /* Only prevent horizontal scrolling */
+  overflow: hidden; /* Prevent ALL scrolling */
 }
 
 /* Premium Layout */
 .app {
   display: flex;
   flex-direction: column; /* Stack header, main, footer vertically */
-  min-height: 100vh; /* Changed back to min-height */
+  height: 100vh; /* Fixed height to viewport */
   background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
   color: #ffffff;
-  overflow-x: hidden; /* Only prevent horizontal scrolling */
+  overflow: hidden; /* Prevent ALL scrolling */
 }
 
 .main-content {
   display: flex;
   flex: 1;
+  overflow: hidden; /* Remove scrollbar from main canvas area */
 }
 
 /* Remove old sidebar styles - now using PremiumSidebar */
 
 .editor-area {
   flex: 1;
+  height: 100vh; /* Use full viewport height */
+  max-height: 100vh; /* Prevent exceeding viewport */
   background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%); /* Match site gradient instead of white */
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+  overflow: hidden; /* Remove scrollbar from main canvas area */
 }
 
 /* Sidebar sections */
