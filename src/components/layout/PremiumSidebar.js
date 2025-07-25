@@ -22,6 +22,20 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const [processingTimeout, setProcessingTimeout] = useState(null);
   const [isVideoFile, setIsVideoFile] = useState(false); // Track if uploaded file is video
   const fileInputRef = useRef(null);
+  
+  // Collapsible tool card states
+  const [expandedCards, setExpandedCards] = useState({
+    resize: false,
+    colorTools: false,
+    format: false
+  });
+  
+  // Fine-tuning adjustment values
+  const [adjustmentValues, setAdjustmentValues] = useState({
+    brightness: 0, // -100 to +100
+    contrast: 0,   // -100 to +100
+    saturation: 0  // -100 to +100
+  });
 
   // Update custom dimensions when image changes
   useEffect(() => {
@@ -30,6 +44,42 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
       setCustomHeight(originalImage.height.toString());
     }
   }, [originalImage]);
+
+  // Toggle tool card expansion
+  const toggleCard = (cardName) => {
+    setExpandedCards(prev => ({
+      ...prev,
+      [cardName]: !prev[cardName]
+    }));
+  };
+
+  // Handle fine-tuning adjustments with sliders
+  const handleAdjustmentChange = (type, value) => {
+    const numValue = parseInt(value);
+    setAdjustmentValues(prev => ({
+      ...prev,
+      [type]: numValue
+    }));
+    
+    // Apply the adjustment with the new value
+    handleFilterWithValue(type, numValue);
+  };
+
+  // Apply filter with specific value for fine-tuning
+  const handleFilterWithValue = async (filterType, value) => {
+    if (!originalImage) return;
+    
+    setIsProcessing(true);
+    
+    try {
+      const filteredImage = await imageProcessor.filter(originalImage, filterType, value);
+      setProcessedImage(filteredImage);
+    } catch (error) {
+      console.error('Filter error:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handleFileSelect = (file) => {
     console.log('🎯 PremiumSidebar: File selected:', file);
@@ -288,194 +338,400 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
         {originalImage && (
           <div className="tools-container">
             <div className="tool-card">
-              <div className="tool-header">
+              <div 
+                className="tool-header clickable"
+                onClick={() => toggleCard('resize')}
+              >
                 <div className="tool-icon">📷</div>
                 <div className="tool-info">
                   <h3>Social Media Resize</h3>
                   <p>Perfect sizes for Instagram, Facebook, Twitter and Discord</p>
                 </div>
-              </div>
-              
-              <div className="preset-grid">
-                <button className="preset-btn" onClick={() => handleResize(1080, 1080)}>
-                  <span className="preset-icon">📱</span>
-                  <span className="preset-name">Instagram</span>
-                  <span className="preset-size">1080×1080</span>
-                </button>
-                <button className="preset-btn" onClick={() => handleResize(1200, 630)}>
-                  <span className="preset-icon">📘</span>
-                  <span className="preset-name">Facebook</span>
-                  <span className="preset-size">1200×630</span>
-                </button>
-                <button className="preset-btn" onClick={() => handleResize(1024, 512)}>
-                  <span className="preset-icon">🐦</span>
-                  <span className="preset-name">Twitter</span>
-                  <span className="preset-size">1024×512</span>
-                </button>
-                <button className="preset-btn" onClick={() => handleResize(512, 512)}>
-                  <span className="preset-icon">🎮</span>
-                  <span className="preset-name">Discord</span>
-                  <span className="preset-size">512×512</span>
-                </button>
-              </div>
-              
-              {/* Custom Size Inputs */}
-              <div className="custom-resize-section">
-                <h4>✏️ Custom Size</h4>
-                <div className="custom-inputs">
-                  <div className="input-row">
-                    <div className="input-group">
-                      <label>Width</label>
-                      <input
-                        type="number"
-                        value={customWidth}
-                        onChange={(e) => setCustomWidth(e.target.value)}
-                        min="1"
-                        max="4000"
-                        placeholder="Width"
-                      />
-                      <span className="unit">px</span>
-                    </div>
-                    
-                    <div className="dimension-separator">×</div>
-                    
-                    <div className="input-group">
-                      <label>Height</label>
-                      <input
-                        type="number"
-                        value={customHeight}
-                        onChange={(e) => setCustomHeight(e.target.value)}
-                        min="1"
-                        max="4000"
-                        placeholder="Height"
-                      />
-                      <span className="unit">px</span>
-                    </div>
-                  </div>
-                  
-                  {/* Final Dimensions Display */}
-                  <div className="final-dimensions">
-                    <span className="dimensions-label">Final Size:</span>
-                    <span className="dimensions-value">
-                      {customWidth || originalImage?.width || 0} × {customHeight || originalImage?.height || 0}px
-                    </span>
-                  </div>
-                  
-                  <button 
-                    className="custom-resize-btn"
-                    onClick={handleCustomResize}
-                    disabled={!customWidth || !customHeight || customWidth === originalImage?.width.toString() && customHeight === originalImage?.height.toString()}
-                  >
-                    ✅ Apply Custom Size
-                  </button>
+                <div className={`expand-arrow ${expandedCards.resize ? 'expanded' : ''}`}>
+                  ▼
                 </div>
               </div>
+              
+              {expandedCards.resize && (
+                <div className="tool-content">
+                  <div className="preset-grid">
+                    <button className="preset-btn" onClick={() => handleResize(1080, 1080)}>
+                      <span className="preset-icon">📱</span>
+                      <span className="preset-name">Instagram</span>
+                      <span className="preset-size">1080×1080</span>
+                    </button>
+                    <button className="preset-btn" onClick={() => handleResize(1200, 630)}>
+                      <span className="preset-icon">📘</span>
+                      <span className="preset-name">Facebook</span>
+                      <span className="preset-size">1200×630</span>
+                    </button>
+                    <button className="preset-btn" onClick={() => handleResize(1024, 512)}>
+                      <span className="preset-icon">🐦</span>
+                      <span className="preset-name">Twitter</span>
+                      <span className="preset-size">1024×512</span>
+                    </button>
+                    <button className="preset-btn" onClick={() => handleResize(512, 512)}>
+                      <span className="preset-icon">🎮</span>
+                      <span className="preset-name">Discord</span>
+                      <span className="preset-size">512×512</span>
+                    </button>
+                  </div>
+                  
+                  {/* Custom Size Inputs */}
+                  <div className="custom-resize-section">
+                    <h4>✏️ Custom Size</h4>
+                    <div className="custom-inputs">
+                      <div className="input-row">
+                        <div className="input-group">
+                          <label>Width</label>
+                          <input
+                            type="number"
+                            value={customWidth}
+                            onChange={(e) => setCustomWidth(e.target.value)}
+                            min="1"
+                            max="4000"
+                            placeholder="Width"
+                          />
+                          <span className="unit">px</span>
+                        </div>
+                        
+                        <div className="dimension-separator">×</div>
+                        
+                        <div className="input-group">
+                          <label>Height</label>
+                          <input
+                            type="number"
+                            value={customHeight}
+                            onChange={(e) => setCustomHeight(e.target.value)}
+                            min="1"
+                            max="4000"
+                            placeholder="Height"
+                          />
+                          <span className="unit">px</span>
+                        </div>
+                      </div>
+                      
+                      {/* Final Dimensions Display */}
+                      <div className="final-dimensions">
+                        <span className="dimensions-label">Final Size:</span>
+                        <span className="dimensions-value">
+                          {customWidth || originalImage?.width || 0} × {customHeight || originalImage?.height || 0}px
+                        </span>
+                      </div>
+                      
+                      <button 
+                        className="custom-resize-btn"
+                        onClick={handleCustomResize}
+                        disabled={!customWidth || !customHeight || customWidth === originalImage?.width.toString() && customHeight === originalImage?.height.toString()}
+                      >
+                        ✅ Apply Custom Size
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="tool-card">
-              <div className="tool-header">
+              <div 
+                className="tool-header clickable"
+                onClick={() => toggleCard('format')}
+              >
                 <div className="tool-icon">🔄</div>
                 <div className="tool-info">
                   <h3>Format Converter</h3>
-                  <p>Convert between JPG, PNG, WebP formats</p>
+                  <p>Convert between PNG, JPG, WebP, BMP, and TIFF formats</p>
+                </div>
+                <div className={`expand-arrow ${expandedCards.format ? 'expanded' : ''}`}>
+                  ▼
                 </div>
               </div>
               
-              <div className="format-buttons">
-                <button 
-                  className={`format-btn ${selectedFormat === 'png' ? 'selected' : ''}`}
-                  onClick={() => handleFormatSelect('png')}
-                >
-                  PNG
-                </button>
-                <button 
-                  className={`format-btn ${selectedFormat === 'jpg' ? 'selected' : ''}`}
-                  onClick={() => handleFormatSelect('jpg')}
-                >
-                  JPG
-                </button>
-                <button 
-                  className={`format-btn ${selectedFormat === 'webp' ? 'selected' : ''}`}
-                  onClick={() => handleFormatSelect('webp')}
-                >
-                  WebP
-                </button>
-                <button 
-                  className={`format-btn ${selectedFormat === 'gif' ? 'selected' : ''} ${!isVideoFile ? 'disabled' : ''}`}
-                  onClick={() => isVideoFile ? handleFormatSelect('gif') : null}
-                  disabled={!isVideoFile}
-                  title={isVideoFile ? "Create animated GIF from video" : "GIF conversion only available for video files - upload a video to enable"}
-                >
-                  GIF {!isVideoFile && '(Video Only)'}
-                </button>
-              </div>
-              
-              <button 
-                className={`tool-button ${isProcessing ? 'processing' : ''} ${selectedFormat && !isProcessing ? 'ready' : ''}`}
-                onClick={handleFormatConvert}
-                disabled={!selectedFormat || !originalImage || isProcessing}
-              >
-                {isProcessing ? (
-                  <>🔄 {processingStatus || 'Converting...'}</>
-                ) : (
-                  <>🔄 Convert to {selectedFormat ? selectedFormat.toUpperCase() : 'Format'}</>
-                )}
-              </button>
-              
-              {processingStatus && isProcessing && (
-                <div className="processing-status">
-                  <div className="status-message">{processingStatus}</div>
-                  <div className="status-hint">💡 Check browser console (F12) for detailed progress</div>
-                </div>
-              )}
-              
-              {conversionSuccess && (
-                <div className="success-notification">
-                  <div className="success-icon">✅</div>
-                  <div className="success-message">{successMessage}</div>
+              {expandedCards.format && (
+                <div className="tool-content">
+                  <div className="format-buttons">
+                    <button 
+                      className={`format-btn ${selectedFormat === 'png' ? 'selected' : ''}`}
+                      onClick={() => handleFormatSelect('png')}
+                    >
+                      PNG
+                    </button>
+                    <button 
+                      className={`format-btn ${selectedFormat === 'jpg' ? 'selected' : ''}`}
+                      onClick={() => handleFormatSelect('jpg')}
+                    >
+                      JPG
+                    </button>
+                    <button 
+                      className={`format-btn ${selectedFormat === 'jpeg' ? 'selected' : ''}`}
+                      onClick={() => handleFormatSelect('jpeg')}
+                    >
+                      JPEG
+                    </button>
+                    <button 
+                      className={`format-btn ${selectedFormat === 'webp' ? 'selected' : ''}`}
+                      onClick={() => handleFormatSelect('webp')}
+                    >
+                      WebP
+                    </button>
+                    <button 
+                      className={`format-btn ${selectedFormat === 'bmp' ? 'selected' : ''}`}
+                      onClick={() => handleFormatSelect('bmp')}
+                    >
+                      BMP
+                    </button>
+                    <button 
+                      className={`format-btn ${selectedFormat === 'tiff' ? 'selected' : ''}`}
+                      onClick={() => handleFormatSelect('tiff')}
+                    >
+                      TIFF
+                    </button>
+                  </div>
+                  
+                  <button 
+                    className={`tool-button ${isProcessing ? 'processing' : ''} ${selectedFormat && !isProcessing ? 'ready' : ''}`}
+                    onClick={handleFormatConvert}
+                    disabled={!selectedFormat || !originalImage || isProcessing}
+                  >
+                    {isProcessing ? (
+                      <>🔄 {processingStatus || 'Converting...'}</>
+                    ) : (
+                      <>🔄 Convert to {selectedFormat ? selectedFormat.toUpperCase() : 'Format'}</>
+                    )}
+                  </button>
+                  
+                  {processingStatus && isProcessing && (
+                    <div className="processing-status">
+                      <div className="status-message">{processingStatus}</div>
+                      <div className="status-hint">💡 Check browser console (F12) for detailed progress</div>
+                    </div>
+                  )}
+                  
+                  {conversionSuccess && (
+                    <div className="success-notification">
+                      <div className="success-icon">✅</div>
+                      <div className="success-message">{successMessage}</div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
+            {/* GIF Creator - Standalone Tool */}
             <div className="tool-card">
               <div className="tool-header">
-                <div className="tool-icon">🎨</div>
+                <div className="tool-icon">🎬</div>
                 <div className="tool-info">
-                  <h3>Premium Filters</h3>
-                  <p>Professional photo effects and enhancements</p>
+                  <h3>GIF Creator</h3>
+                  <p>Convert videos to animated GIFs</p>
                 </div>
               </div>
               
-              <button className="tool-button" onClick={() => handleFilter('blur')}>
-                Blur Effect
-              </button>
+              {isVideoFile ? (
+                <button 
+                  className={`tool-button ${isProcessing && selectedFormat === 'gif' ? 'processing' : ''}`}
+                  onClick={() => {
+                    setSelectedFormat('gif');
+                    handleFormatConvert();
+                  }}
+                  disabled={isProcessing}
+                >
+                  {isProcessing && selectedFormat === 'gif' ? (
+                    <>🔄 Creating GIF...</>
+                  ) : (
+                    <>🎬 Create Animated GIF</>
+                  )}
+                </button>
+              ) : (
+                <div className="tool-disabled-message">
+                  <div className="disabled-icon">📹</div>
+                  <p>Upload a video file (MP4, MOV) to create animated GIFs</p>
+                </div>
+              )}
             </div>
 
+            {/* Unified Color Tools Card */}
+            <div className="tool-card">
+              <div 
+                className="tool-header clickable"
+                onClick={() => toggleCard('colorTools')}
+              >
+                <div className="tool-icon">🎨</div>
+                <div className="tool-info">
+                  <h3>Color & Filter Tools</h3>
+                  <p>Professional filters, adjustments, and effects</p>
+                </div>
+                <div className={`expand-arrow ${expandedCards.colorTools ? 'expanded' : ''}`}>
+                  ▼
+                </div>
+              </div>
+              
+              {expandedCards.colorTools && (
+                <div className="tool-content">
+                  {/* Fine-Tuning Color Adjustments */}
+                  <div className="adjustment-section">
+                    <h4>🎛️ Fine-Tune Adjustments</h4>
+                    <div className="slider-controls">
+                      <div className="slider-group">
+                        <label>
+                          <span>☀️ Brightness</span>
+                          <span className="slider-value">{adjustmentValues.brightness}</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="-100"
+                          max="100"
+                          value={adjustmentValues.brightness}
+                          onChange={(e) => handleAdjustmentChange('brightness', e.target.value)}
+                          className="adjustment-slider brightness-slider"
+                        />
+                      </div>
+                      
+                      <div className="slider-group">
+                        <label>
+                          <span>⚡ Contrast</span>
+                          <span className="slider-value">{adjustmentValues.contrast}</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="-100"
+                          max="100"
+                          value={adjustmentValues.contrast}
+                          onChange={(e) => handleAdjustmentChange('contrast', e.target.value)}
+                          className="adjustment-slider contrast-slider"
+                        />
+                      </div>
+                      
+                      <div className="slider-group">
+                        <label>
+                          <span>🌈 Saturation</span>
+                          <span className="slider-value">{adjustmentValues.saturation}</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="-100"
+                          max="100"
+                          value={adjustmentValues.saturation}
+                          onChange={(e) => handleAdjustmentChange('saturation', e.target.value)}
+                          className="adjustment-slider saturation-slider"
+                        />
+                      </div>
+                      
+                      <button 
+                        className="reset-adjustments-btn"
+                        onClick={() => {
+                          setAdjustmentValues({ brightness: 0, contrast: 0, saturation: 0 });
+                          setProcessedImage(originalImage);
+                        }}
+                      >
+                        Reset All
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Premium Creative Filters */}
+                  <div className="filter-section">
+                    <h4>✨ Creative Filters</h4>
+                    <div className="filter-grid">
+                      <button 
+                        className="filter-btn"
+                        onClick={() => handleFilter('vintage')}
+                        title="Classic vintage film look"
+                      >
+                        <div className="filter-preview">📸</div>
+                        <span>Vintage</span>
+                      </button>
+                      
+                      <button 
+                        className="filter-btn"
+                        onClick={() => handleFilter('vibrant')}
+                        title="Boost colors and contrast"
+                      >
+                        <div className="filter-preview">🌈</div>
+                        <span>Vibrant</span>
+                      </button>
+                      
+                      <button 
+                        className="filter-btn"
+                        onClick={() => handleFilter('dramatic')}
+                        title="High contrast dramatic effect"
+                      >
+                        <div className="filter-preview">⚡</div>
+                        <span>Dramatic</span>
+                      </button>
+                      
+                      <button 
+                        className="filter-btn"
+                        onClick={() => handleFilter('dreamy')}
+                        title="Soft dreamy atmosphere"
+                      >
+                        <div className="filter-preview">✨</div>
+                        <span>Dreamy</span>
+                      </button>
+                      
+                      <button 
+                        className="filter-btn"
+                        onClick={() => handleFilter('blur')}
+                        title="Add professional blur effect"
+                      >
+                        <div className="filter-preview">🌫️</div>
+                        <span>Blur</span>
+                      </button>
+                      
+                      <button 
+                        className="filter-btn"
+                        onClick={() => handleFilter('sharp')}
+                        title="Enhance image sharpness"
+                      >
+                        <div className="filter-preview">🔍</div>
+                        <span>Sharp</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Black & White Effects */}
+                  <div className="bw-section">
+                    <h4>⚫⚪ Black & White</h4>
+                    <div className="bw-grid">
+                      <button 
+                        className="bw-btn"
+                        onClick={() => handleFilter('grayscale')}
+                        title="Convert to grayscale"
+                      >
+                        <div className="bw-preview">⚫</div>
+                        <span>Grayscale</span>
+                      </button>
+                      
+                      <button 
+                        className="bw-btn"
+                        onClick={() => handleFilter('sepia')}
+                        title="Classic sepia tone"
+                      >
+                        <div className="bw-preview">🟤</div>
+                        <span>Sepia</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* AI Background Removal - Standalone Tool */}
             <div className="tool-card">
               <div className="tool-header">
                 <div className="tool-icon">✂️</div>
                 <div className="tool-info">
                   <h3>AI Background Removal</h3>
-                  <p>Automatically remove backgrounds with AI</p>
+                  <p>Automatically remove backgrounds with AI technology</p>
                 </div>
               </div>
               
-              <button className="tool-button" onClick={() => handleFilter('remove-bg')}>
-                Remove Background
-              </button>
-            </div>
-
-            <div className="tool-card">
-              <div className="tool-header">
-                <div className="tool-icon">🔧</div>
-                <div className="tool-info">
-                  <h3>Quick Tools</h3>
-                  <p>Essential image editing functions</p>
-                </div>
-              </div>
-              
-              <button className="tool-button" onClick={() => handleFilter('grayscale')}>
-                Grayscale
+              <button 
+                className="tool-button"
+                onClick={() => handleFilter('remove-bg')}
+                disabled={isProcessing}
+              >
+                {isProcessing ? '🔄 Processing...' : '✂️ Remove Background'}
               </button>
             </div>
           </div>

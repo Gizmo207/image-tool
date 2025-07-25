@@ -238,6 +238,174 @@ export const imageProcessor = {
     });
   },
 
+  // Comprehensive filter system with value-based adjustments
+  filter(image, filterType, value = null) {
+    return new Promise((resolve) => {
+      console.log('🎨 Applying filter:', filterType, 'value:', value);
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = image.width;
+      canvas.height = image.height;
+      
+      // Use value if provided, otherwise use default intensity
+      const intensity = value !== null ? Math.abs(value) / 100 : 0.8;
+      
+      // Apply filter based on type
+      switch (filterType) {
+        case 'blur':
+          ctx.filter = `blur(${Math.round(intensity * 5)}px)`;
+          break;
+          
+        case 'grayscale':
+          ctx.filter = `grayscale(${intensity * 100}%)`;
+          break;
+          
+        case 'sepia':
+          ctx.filter = `sepia(${intensity * 100}%)`;
+          break;
+          
+        case 'brightness':
+          // Handle value-based brightness: -100 to +100 -> 0.0 to 2.0
+          if (value !== null) {
+            const brightnessValue = 1 + (value / 100); // -100 = 0.0, 0 = 1.0, +100 = 2.0
+            ctx.filter = `brightness(${Math.max(0, brightnessValue)})`;
+          } else {
+            ctx.filter = `brightness(${0.5 + intensity * 1.5})`;
+          }
+          break;
+          
+        case 'contrast':
+          // Handle value-based contrast: -100 to +100 -> 0.0 to 2.0
+          if (value !== null) {
+            const contrastValue = 1 + (value / 100); // -100 = 0.0, 0 = 1.0, +100 = 2.0
+            ctx.filter = `contrast(${Math.max(0, contrastValue)})`;
+          } else {
+            ctx.filter = `contrast(${0.5 + intensity * 1.5})`;
+          }
+          break;
+          
+        case 'saturate':
+        case 'saturation':
+          // Handle value-based saturation: -100 to +100 -> 0.0 to 2.0
+          if (value !== null) {
+            const saturationValue = 1 + (value / 100); // -100 = 0.0, 0 = 1.0, +100 = 2.0
+            ctx.filter = `saturate(${Math.max(0, saturationValue)})`;
+          } else {
+            ctx.filter = `saturate(${intensity * 2})`;
+          }
+          break;
+          
+        case 'vintage':
+          ctx.filter = `sepia(0.3) contrast(1.2) brightness(0.9) saturate(0.8)`;
+          break;
+          
+        case 'cool':
+          ctx.filter = `hue-rotate(210deg) saturate(1.2)`;
+          break;
+          
+        case 'warm':
+          ctx.filter = `hue-rotate(30deg) saturate(1.1) brightness(1.1)`;
+          break;
+          
+        case 'vibrant':
+          ctx.filter = `saturate(1.5) contrast(1.2) brightness(1.05)`;
+          break;
+          
+        case 'dramatic':
+          ctx.filter = `contrast(1.5) brightness(0.9) saturate(1.3)`;
+          break;
+          
+        case 'dreamy':
+          ctx.filter = `blur(1px) brightness(1.1) saturate(0.9) contrast(0.9)`;
+          break;
+          
+        case 'sharp':
+          // Sharpening requires pixel manipulation
+          this.applySharpening(ctx, image, intensity);
+          resolve(canvas.toDataURL('image/png'));
+          return;
+          
+        case 'remove-bg':
+          // Use existing background removal
+          const processed = this.removeBackground(image);
+          resolve(processed.src);
+          return;
+          
+        default:
+          ctx.filter = 'none';
+      }
+      
+      ctx.drawImage(image, 0, 0);
+      
+      // Apply vignette effect for certain filters
+      if (['vintage', 'dramatic', 'dreamy'].includes(filterType)) {
+        this.applyVignette(ctx, canvas.width, canvas.height, intensity * 0.3);
+      }
+      
+      const dataURL = canvas.toDataURL('image/png');
+      console.log('✅ Filter applied successfully:', filterType);
+      resolve(dataURL);
+    });
+  },
+
+  // Apply sharpening effect using convolution
+  applySharpening(ctx, image, intensity = 1.0) {
+    ctx.drawImage(image, 0, 0);
+    
+    const imageData = ctx.getImageData(0, 0, image.width, image.height);
+    const data = imageData.data;
+    const width = image.width;
+    const height = image.height;
+    
+    // Sharpening kernel
+    const sharpenStrength = intensity * 0.5;
+    const kernel = [
+      0, -sharpenStrength, 0,
+      -sharpenStrength, 1 + 4 * sharpenStrength, -sharpenStrength,
+      0, -sharpenStrength, 0
+    ];
+    
+    const outputData = new Uint8ClampedArray(data);
+    
+    for (let y = 1; y < height - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        for (let c = 0; c < 3; c++) { // RGB channels only
+          let sum = 0;
+          for (let ky = -1; ky <= 1; ky++) {
+            for (let kx = -1; kx <= 1; kx++) {
+              const idx = ((y + ky) * width + (x + kx)) * 4 + c;
+              const kernelIdx = (ky + 1) * 3 + (kx + 1);
+              sum += data[idx] * kernel[kernelIdx];
+            }
+          }
+          const outputIdx = (y * width + x) * 4 + c;
+          outputData[outputIdx] = Math.max(0, Math.min(255, sum));
+        }
+      }
+    }
+    
+    const outputImageData = new ImageData(outputData, width, height);
+    ctx.putImageData(outputImageData, 0, 0);
+  },
+
+  // Apply vignette effect
+  applyVignette(ctx, width, height, intensity = 0.3) {
+    const gradient = ctx.createRadialGradient(
+      width / 2, height / 2, 0,
+      width / 2, height / 2, Math.max(width, height) * 0.7
+    );
+    
+    gradient.addColorStop(0, `rgba(0, 0, 0, 0)`);
+    gradient.addColorStop(1, `rgba(0, 0, 0, ${intensity})`);
+    
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    ctx.globalCompositeOperation = 'source-over';
+  },
+
   // Convert file to GIF (only handles video files now)
   async convertToGif(file) {
     console.log('🎨 ImageProcessor: Starting GIF conversion for:', {
