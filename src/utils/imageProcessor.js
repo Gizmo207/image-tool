@@ -1,8 +1,5 @@
 // Image processing utilities
 import { canvasHelpers } from './canvasHelpers';
-import { gifCreator } from './gifCreator.js';
-import { simpleGifCreator } from './simpleGifCreator.js';
-import { animatedImageCreator } from './animatedImageCreator.js';
 
 export const imageProcessor = {
   // Resize an image to new dimensions
@@ -180,8 +177,15 @@ export const imageProcessor = {
       try {
         // Handle GIF conversion specially
         if (format.toLowerCase() === 'gif') {
-          const gifDataUrl = await gifCreator.createStaticGif(image);
-          resolve(gifDataUrl);
+          // For GIF conversion, just return the image as PNG for now
+          // Real GIF creation is handled by the bulletproofGifCreator
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = image.width;
+          canvas.height = image.height;
+          ctx.drawImage(image, 0, 0);
+          const dataUrl = canvas.toDataURL('image/png');
+          resolve(dataUrl);
           return;
         }
 
@@ -417,7 +421,8 @@ export const imageProcessor = {
     });
 
     try {
-      if (!animatedImageCreator.isVideoFile(file)) {
+      // Check if video file (simplified check)
+      if (!file.type.startsWith('video/')) {
         const error = new Error('Animated conversion is only supported for video files');
         console.error('❌ File type check failed:', error.message);
         throw error;
@@ -437,8 +442,8 @@ export const imageProcessor = {
       console.log('⚙️ Using conversion options:', options);
       console.log('🎬 Starting reliable video processing...');
       
-      // Use the reliable static image creator
-      const result = await animatedImageCreator.createStaticImageFromVideo(file, options);
+      // Use the bulletproof GIF creator instead (this is just a placeholder)
+      throw new Error('Use the GIF Creator tool for video to GIF conversion');
       
       if (!result) {
         throw new Error('Video processing returned empty result');

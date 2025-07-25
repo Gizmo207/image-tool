@@ -30,7 +30,8 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const [expandedCards, setExpandedCards] = useState({
     resize: false,
     colorTools: false,
-    format: false
+    format: false,
+    gifCreator: false
   });
   
   // Fine-tuning adjustment values
@@ -553,32 +554,42 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
 
             {/* GIF Creator - Standalone Tool with Advanced Interface */}
             <div className={`tool-card ${isGifCreating ? 'gif-creating' : ''}`}>
-              <div className="tool-header">
+              <div 
+                className="tool-header clickable"
+                onClick={() => toggleCard('gifCreator')}
+              >
                 <div className="tool-icon">🎬</div>
                 <div className="tool-info">
                   <h3>GIF Creator</h3>
                   <p>Create animated GIFs from your videos with full control</p>
                 </div>
+                <div className={`expand-arrow ${expandedCards.gifCreator ? 'expanded' : ''}`}>
+                  ▼
+                </div>
               </div>
               
-              <GifCreatorInterface
-                videoFile={originalImage?.originalVideoFile || originalFile}
-                onGifCreated={(gifDataUrl) => {
-                  console.log('✅ GIF created successfully');
-                  setProcessedImage(gifDataUrl);
-                  setProcessedFormat('gif');
-                  setIsGifCreating(false);
-                }}
-                onError={(errorMessage) => {
-                  console.error('❌ GIF creation error:', errorMessage);
-                  alert('GIF creation failed: ' + errorMessage);
-                  setIsGifCreating(false);
-                }}
-                onProgressUpdate={(progressData) => {
-                  setIsGifCreating(progressData.isCreating);
-                  onGifProgressUpdate?.(progressData);
-                }}
-              />
+              {expandedCards.gifCreator && (
+                <div className="tool-content">
+                  <GifCreatorInterface
+                    videoFile={originalImage?.originalVideoFile || originalFile}
+                    onGifCreated={(gifDataUrl) => {
+                      console.log('✅ GIF created successfully');
+                      setProcessedImage(gifDataUrl);
+                      setProcessedFormat('gif');
+                      setIsGifCreating(false);
+                    }}
+                    onError={(errorMessage) => {
+                      console.error('❌ GIF creation error:', errorMessage);
+                      alert('GIF creation failed: ' + errorMessage);
+                      setIsGifCreating(false);
+                    }}
+                    onProgressUpdate={(progressData) => {
+                      setIsGifCreating(progressData.isCreating);
+                      onGifProgressUpdate?.(progressData);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Unified Color Tools Card */}

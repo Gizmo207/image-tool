@@ -4,17 +4,24 @@ import { imageProcessor } from '../../utils/imageProcessor';
 
 function BackgroundRemover({ originalImage, setProcessedImage, setIsProcessing, hasProLicense }) {
   const handleRemoveBackground = async () => {
-    if (!originalImage) return;
+    if (!originalImage) {
+      alert('Please upload an image first');
+      return;
+    }
 
     setIsProcessing(true);
     
     try {
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('🎭 Starting background removal...');
       
-      const processedImage = imageProcessor.removeBackground(originalImage);
-      setProcessedImage(processedImage);
+      // Call the background removal function and await the result
+      const processedImage = await imageProcessor.removeBackground(originalImage);
+      
+      console.log('✅ Background removal completed');
+      setProcessedImage(processedImage.src);
+      
     } catch (error) {
+      console.error('❌ Background removal failed:', error);
       alert('Error removing background: ' + error.message);
     } finally {
       setIsProcessing(false);
