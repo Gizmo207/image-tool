@@ -1,6 +1,7 @@
 # 🧪 SnapForge Testing Checklist
 
 ## ✅ **FIXED: Background Remover**
+
 - **Issue**: Button click did nothing
 - **Root Cause**: Async handling issue in filter function
 - **Fix**: Made filter function async and handled remove-bg case properly
@@ -11,6 +12,7 @@
 ## 🚀 **Quick Functionality Test (Before Full Gauntlet)**
 
 ### 1. **Basic Upload & Display**
+
 - [ ] Upload JPG image - displays correctly
 - [ ] Upload PNG image - displays correctly  
 - [ ] Upload video file - shows preview frame
@@ -18,12 +20,14 @@
 - [ ] File picker works
 
 ### 2. **Image Tools**
+
 - [ ] **Resize**: Change dimensions, apply preset sizes
 - [ ] **Filters**: Apply vintage, blur, grayscale, etc.
 - [ ] **Background Removal**: ✂️ Remove Background button works
 - [ ] **Format Conversion**: Convert to different formats
 
-### 3. **GIF Creator** 
+### 3. **GIF Creator**
+
 - [ ] Upload video file
 - [ ] Expand GIF Creator tool (collapsible)
 - [ ] Adjust settings (start time, duration, fps, size)
@@ -31,6 +35,7 @@
 - [ ] Download animated GIF - actually animates when opened
 
 ### 4. **UI Polish**
+
 - [ ] All tools collapse/expand properly
 - [ ] No hover glitching during GIF creation
 - [ ] Progress bars animate smoothly
@@ -41,6 +46,7 @@
 ## 📋 **Full Edge Case Testing Gauntlet**
 
 ### 📦 **1. File Upload Edge Cases**
+
 | Test Case | Description | Expected Result |
 |-----------|-------------|-----------------|
 | ✅ Large file (15MB+) | Upload high-res image | Handles without crashing |
@@ -50,6 +56,7 @@
 | ✅ Corrupted file | Broken/partial file | Shows error, doesn't crash |
 
 ### 🧰 **2. Tool Functionality Edge Cases**
+
 | Tool | Edge Case | Expected Result |
 |------|-----------|-----------------|
 | ✅ Resize | 1x1 pixels | Handles gracefully |
@@ -59,6 +66,7 @@
 | ✅ GIF Creator | Very short/long videos | Proper time validation |
 
 ### 🔑 **3. Pro License System**
+
 | Test Case | Expected Result |
 |-----------|-----------------|
 | ✅ Valid license entry | Unlocks pro features |
@@ -67,6 +75,7 @@
 | ✅ Pro feature blocking | Free users see upgrade prompts |
 
 ### 🖥️ **4. Performance & Stability**
+
 | Test | Method | Pass Condition |
 |------|--------|-----------------|
 | ✅ Rapid tool switching | Click tools quickly | No lag/crashes |
@@ -75,6 +84,7 @@
 | ✅ GIF creation stress | Create multiple GIFs | Progress bars work consistently |
 
 ### 🧼 **5. UI/UX Polish**
+
 | Test Case | Expected Result |
 |-----------|-----------------|
 | ✅ Tool collapsing | All tools expand/collapse smoothly |
@@ -89,7 +99,7 @@
 ## 🎯 **Testing Priority Order**
 
 1. **Basic Functionality** (Must work perfectly)
-2. **GIF Creator** (Key differentiator) 
+2. **GIF Creator** (Key differentiator)
 3. **Edge Cases** (Robustness)
 4. **Performance** (User experience)
 5. **Polish** (Professional feel)
@@ -97,6 +107,7 @@
 ---
 
 ## 🚨 **Known Issues to Verify Fixed**
+
 - [x] Background remover not working ✅ **FIXED**
 - [x] GIF progress bar sidebar glitching ✅ **FIXED**
 - [x] GIF downloads as static image ✅ **FIXED**
@@ -105,6 +116,7 @@
 ---
 
 ## 🎉 **Ready for Gumroad When...**
+
 - [ ] All basic functionality tests pass
 - [ ] All edge cases handled gracefully  
 - [ ] Performance is smooth under load

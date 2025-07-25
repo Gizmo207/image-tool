@@ -18,8 +18,9 @@
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "@mediapipe/selfie_segmentation": "^0.1.1675465747",
     "@rollup/rollup-win32-x64-msvc": "^4.45.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "gif.js": "^0.2.0",
     "gifshot": "^0.4.5",
     "react": "^19.1.0",

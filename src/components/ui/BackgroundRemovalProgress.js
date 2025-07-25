@@ -46,9 +46,9 @@ const BackgroundRemovalProgress = ({ isVisible, onComplete }) => {
     <div className="bg-removal-progress-overlay">
       <div className="bg-removal-progress-container">
         <div className="bg-removal-header">
-          <div className="bg-removal-icon">🏆</div>
-          <h3>Google MediaPipe AI</h3>
-          <p>The ONLY background remover • Free forever • Best quality</p>
+          <div className="bg-removal-icon">🚀</div>
+          <h3>U-2-Net Professional AI</h3>
+          <p>Remove.bg quality • Industry-grade • Offline & free</p>
         </div>
 
         <div className="bg-removal-stages">

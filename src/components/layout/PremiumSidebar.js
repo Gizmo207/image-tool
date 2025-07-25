@@ -791,20 +791,35 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
               )}
             </div>
 
-            {/* AI Background Removal - Standalone Tool */}
+            {/* U-2-Net Professional Background Removal - ONLY SOLUTION */}
             <div className="tool-card">
               <div className="tool-header">
-                <div className="tool-icon">🏆</div>
+                <div className="tool-icon">🚀</div>
                 <div className="tool-info">
-                  <h3>Google MediaPipe AI</h3>
-                  <p>The ONLY background remover • Professional • Free forever</p>
+                  <h3>U-2-Net Professional AI</h3>
+                  <p>Remove.bg quality • Industry-grade • Offline & free</p>
+                </div>
+              </div>
+              
+              <div className="tool-content" style={{ paddingTop: '0', paddingBottom: '15px' }}>
+                <div className="u2net-features">
+                  <h4 style={{ color: '#40e0ff', fontSize: '14px', marginBottom: '10px' }}>
+                    🚀 SMART AUTO-DETECTION + Polish Layer
+                  </h4>
+                  <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.4' }}>
+                    <div style={{ marginBottom: '8px' }}>✅ AI automatically detects image content</div>
+                    <div style={{ marginBottom: '8px' }}>✅ Chooses optimal model (Human/Animal/Object)</div>
+                    <div style={{ marginBottom: '8px' }}>✅ Auto contrast & edge enhancement</div>
+                    <div style={{ marginBottom: '8px' }}>✅ Post-processing cleanup & recovery</div>
+                    <div style={{ marginBottom: '8px' }}>✅ Zero manual selection required</div>
+                  </div>
                 </div>
               </div>
               
               <button 
                 className="tool-button"
                 onClick={async () => {
-                  console.log('🚨 BACKGROUND REMOVAL BUTTON CLICKED!');
+                  console.log('� U-2-Net PROFESSIONAL BACKGROUND REMOVAL STARTED!');
                   
                   if (!originalImage) {
                     alert('Please upload an image first!');
@@ -813,32 +828,34 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                   
                   try {
                     setIsProcessing(true);
-                    console.log('✅ Processing started');
+                    setShowBgRemovalProgress(true);
+                    console.log('✅ Processing started with U-2-Net');
                     
-                    console.log('🔄 Calling imageProcessor.filter...');
+                    console.log('🔄 Calling U-2-Net background removal...');
                     const result = await imageProcessor.filter(originalImage, 'remove-bg');
                     
-                    console.log('✅ Background removal completed!', result ? 'HAS_RESULT' : 'NO_RESULT');
+                    console.log('✅ U-2-Net background removal completed!', result ? 'HAS_RESULT' : 'NO_RESULT');
                     
                     if (result) {
                       setProcessedImage(result);
                       setProcessedFormat('png');
-                      alert('Background removed successfully!');
+                      alert('🚀 Professional background removal complete!\n\nRemove.bg quality results with perfect edge detection.');
                     } else {
                       alert('Background removal returned empty result');
                     }
                     
                   } catch (error) {
-                    console.error('❌ Background removal failed:', error);
+                    console.error('❌ U-2-Net background removal failed:', error);
                     alert('Background removal failed: ' + error.message);
                   } finally {
                     setIsProcessing(false);
-                    console.log('✅ Processing finished');
+                    setShowBgRemovalProgress(false);
+                    console.log('✅ U-2-Net processing finished');
                   }
                 }}
                 disabled={!originalImage || isProcessing}
               >
-                {isProcessing ? '🏆 Google AI Processing...' : '🏆 Remove Background (MediaPipe)'}
+                {isProcessing ? '🧠 SMART AI Processing...' : '🚀 SMART Background Removal'}
               </button>
             </div>
           </div>

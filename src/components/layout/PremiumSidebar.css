@@ -1347,6 +1347,7 @@
     font-size: 14px;
     color: rgba(64, 224, 255, 0.8);
     transition: transform 0.3s ease;
+    -webkit-user-select: none;
     user-select: none;
 }
 
@@ -1420,6 +1421,7 @@
 
 .adjustment-slider {
     -webkit-appearance: none;
+    appearance: none;
     width: 100%;
     height: 6px;
     border-radius: 3px;

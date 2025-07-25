@@ -1,6 +1,6 @@
 // Image processing utilities
 import { canvasHelpers } from './canvasHelpers';
-import { professionalBackgroundRemover } from './professionalBackgroundRemover';
+import { bestBackgroundRemover } from './bestBackgroundRemover';
 
 export const imageProcessor = {
   // Resize an image to new dimensions
@@ -31,9 +31,9 @@ export const imageProcessor = {
     console.log('🤖 IMAGEPROCESSOR: Input image:', typeof image, image);
     
     try {
-      // Use the professional AI-powered remover
-      console.log('🎯 IMAGEPROCESSOR: Calling professionalBackgroundRemover...');
-      const result = await professionalBackgroundRemover.removeBackground(image, {
+      // Use the U-2-Net professional AI remover - THE ONLY SOLUTION
+      console.log('🎯 IMAGEPROCESSOR: Calling U-2-Net bestBackgroundRemover...');
+      const result = await bestBackgroundRemover.removeBackground(image, {
         onProgress: options.onProgress || ((key, current, total) => {
           const percent = Math.round((current / total) * 100);
           console.log(`🔄 AI Processing: ${key} - ${percent}%`);
@@ -47,7 +47,7 @@ export const imageProcessor = {
         })
       });
       
-      console.log('✅ IMAGEPROCESSOR: MediaPipe result:', typeof result, result ? 'HAS_RESULT' : 'NO_RESULT');
+      console.log('✅ IMAGEPROCESSOR: U-2-Net result:', typeof result, result ? 'HAS_RESULT' : 'NO_RESULT');
       
       // Convert result to Image object for compatibility
       return new Promise((resolve) => {
