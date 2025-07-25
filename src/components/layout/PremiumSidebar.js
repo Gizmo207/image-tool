@@ -180,11 +180,14 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
       
       // Handle GIF conversion - only for video files
       if (selectedFormat.toLowerCase() === 'gif') {
-        if (!isVideoFile || !originalFile) {
-          throw new Error('GIF conversion is only available for video files');
+        // Check if we have a video file available
+        const videoFile = originalImage?.originalVideoFile || originalFile;
+        
+        if (!videoFile || !videoFile.type.startsWith('video/')) {
+          throw new Error('GIF conversion is only available for video files. Please upload a video file first.');
         }
         
-        console.log('🎬 Converting video to GIF...');
+        console.log('🎬 Converting video to GIF using original video file:', videoFile.name);
         setProcessingStatus('📹 Loading video information...');
         await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UI update
         
@@ -193,7 +196,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
         
         setProcessingStatus('⚙️ This may take 30-60 seconds for video files...');
         
-        convertedDataUrl = await imageProcessor.convertToGif(originalFile);
+        convertedDataUrl = await imageProcessor.convertToGif(videoFile);
         console.log('✅ GIF conversion completed successfully');
         
       } else {
@@ -309,11 +312,11 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
           >
             <div className="upload-icon">🎨</div>
             <div className="upload-text">
-              {originalImage ? 'Image Loaded - Upload New' : 'Drop image here or click to browse'}
+              {originalImage ? 'Media Loaded - Upload New' : 'Drop image/video here or click to browse'}
             </div>
             <div className="upload-hint">
-              Supports JPG, PNG, WebP images up to 10MB<br/>
-              <strong>Video files:</strong> Upload MP4/MOV for animated GIF creation!
+              <strong>Images:</strong> JPG, PNG, WebP up to 10MB<br/>
+              <strong>Videos:</strong> MP4/MOV - will show preview frame for GIF creation!
             </div>
             
             {!originalImage && (
@@ -327,7 +330,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               onChange={(e) => handleFileSelect(e.target.files[0])}
               style={{ display: 'none' }}
             />
