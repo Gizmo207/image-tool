@@ -1,0 +1,185 @@
+/* Premium Lock UI Styles - Microsoft/Google Level */
+
+.tool-card.locked {
+  border: 2px solid #ff6b35;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
+  animation: lockedPulse 2s ease-in-out infinite;
+}
+
+.tool-card.locked .tool-header {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(255, 107, 53, 0.1) 100%);
+  cursor: not-allowed;
+}
+
+.tool-card.locked .tool-header:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.3) 0%, rgba(255, 107, 53, 0.15) 100%);
+}
+
+.lock-badge {
+  background: linear-gradient(45deg, #ff6b35, #ff8c42);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: badgeGlow 1.5s ease-in-out infinite alternate;
+}
+
+.expand-arrow.locked {
+  color: #ff6b35;
+  font-size: 1.2rem;
+}
+
+.premium-upgrade-panel {
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 53, 0.1) 0%, 
+    rgba(255, 140, 66, 0.1) 50%,
+    rgba(255, 107, 53, 0.1) 100%
+  );
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 15px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-upgrade-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 100%
+  );
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.upgrade-content {
+  position: relative;
+  z-index: 1;
+}
+
+.upgrade-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  animation: bounceIcon 2s ease-in-out infinite;
+}
+
+.premium-upgrade-panel h4 {
+  color: #ff6b35;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.premium-upgrade-panel p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 15px;
+}
+
+.premium-upgrade-button {
+  background: linear-gradient(45deg, #ff6b35, #ff8c42);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-upgrade-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
+}
+
+.premium-upgrade-button:active {
+  transform: translateY(0);
+}
+
+.premium-upgrade-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    transparent 100%
+  );
+  transition: left 0.5s;
+}
+
+.premium-upgrade-button:hover::before {
+  left: 100%;
+}
+
+/* Animations */
+@keyframes lockedPulse {
+  0%, 100% { 
+    border-color: #ff6b35;
+    box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4);
+  }
+  50% { 
+    border-color: #ff8c42;
+    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+  }
+}
+
+@keyframes badgeGlow {
+  0% { 
+    box-shadow: 0 0 5px rgba(255, 107, 53, 0.5);
+  }
+  100% { 
+    box-shadow: 0 0 15px rgba(255, 107, 53, 0.8);
+  }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes bounceIcon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Trial Status Indicator */
+.trial-status-banner {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 140, 66, 0.15));
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 10px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.trial-status-banner .trial-count {
+  color: #ff6b35;
+  font-weight: bold;
+  font-size: 1.1rem;
+}

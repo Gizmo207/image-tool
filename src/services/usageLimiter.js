@@ -244,12 +244,12 @@ class SnapForgeUsageLimiter {
     const prompts = {
       'background-removal': {
         title: '🎨 Unlock Unlimited Background Removal',
-        message: 'You\'ve used your free background removal. Upgrade to remove backgrounds from unlimited photos!',
+        message: 'Upgrade to remove backgrounds from unlimited photos!',
         cta: 'Unlock Pro for $39.99'
       },
       'resize': {
         title: '📐 Unlock Unlimited Resizing',
-        message: 'Trial limit reached! Upgrade to resize unlimited images with batch processing.',
+        message: 'Upgrade to resize unlimited images + batch processing.',
         cta: 'Get Pro Access'
       },
       'gif-creator': {

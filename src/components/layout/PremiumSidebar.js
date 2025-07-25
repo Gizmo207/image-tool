@@ -33,7 +33,8 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     resize: false,
     colorTools: false,
     format: false,
-    gifCreator: false
+    gifCreator: false,
+    backgroundRemoval: false
   });
   
   // Fine-tuning adjustment values
@@ -320,10 +321,27 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
       return;
     }
     
-    // Special handling for AI background removal - TEMPORARILY DISABLED PROGRESS
+    // Special handling for AI background removal with trial limits
     if (filterType === 'remove-bg') {
-      console.log('🎯 BACKGROUND REMOVAL DETECTED - progress DISABLED for testing');
-      // setShowBgRemovalProgress(true); // DISABLED FOR TESTING
+      console.log('🎯 BACKGROUND REMOVAL DETECTED');
+      
+      // Check trial usage before proceeding
+      const canUse = window.usageLimiter?.canUseTool('background-removal');
+      if (canUse && !canUse.allowed) {
+        // Lock the tool elegantly
+        setLockedTools(prev => ({
+          ...prev,
+          backgroundRemoval: {
+            locked: true,
+            reason: canUse.reason,
+            upgradePrompt: window.usageLimiter.getUpgradePrompt('background-removal')
+          }
+        }));
+        
+        // Auto-collapse the card
+        setExpandedCards(prev => ({ ...prev, backgroundRemoval: false }));
+        return;
+      }
     }
     
     console.log('🔄 Setting isProcessing to true');
@@ -337,20 +355,34 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
       setProcessedImage(filteredDataUrl);
       setProcessedFormat('png'); // Reset to PNG after filter
       
-      // Hide progress indicator after completion
-      if (filterType === 'remove-bg') {
-        setTimeout(() => {
-          console.log('🔄 Hiding background removal progress');
-          setShowBgRemovalProgress(false);
-        }, 1500);
+      // Record usage for background removal
+      if (filterType === 'remove-bg' && window.usageLimiter) {
+        const result = window.usageLimiter.recordUsage('background-removal', {
+          filterType: filterType
+        });
+        console.log('✅ Background removal usage recorded:', result);
+        
+        // Check if this was the last allowed use
+        const newCanUse = window.usageLimiter.canUseTool('background-removal');
+        if (!newCanUse.allowed) {
+          // Lock the tool after this use with delay to show result first
+          setTimeout(() => {
+            setLockedTools(prev => ({
+              ...prev,
+              backgroundRemoval: {
+                locked: true,
+                reason: newCanUse.reason,
+                upgradePrompt: window.usageLimiter.getUpgradePrompt('background-removal')
+              }
+            }));
+            setExpandedCards(prev => ({ ...prev, backgroundRemoval: false }));
+          }, 2000); // Give user time to see the result
+        }
       }
+      
     } catch (error) {
       console.error('❌ FILTER FAILED:', error);
-      alert(`Failed to apply ${filterType === 'remove-bg' ? 'AI background removal' : 'filter'}. Please try again.`);
-      
-      if (filterType === 'remove-bg') {
-        setShowBgRemovalProgress(false);
-      }
+      console.log('Background removal failed:', error.message);
     } finally {
       console.log('🔄 Setting isProcessing to false');
       setIsProcessing(false);
@@ -810,72 +842,67 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
               )}
             </div>
 
-            {/* U-2-Net Professional Background Removal - ONLY SOLUTION */}
-            <div className="tool-card">
-              <div className="tool-header">
-                <div className="tool-icon">🚀</div>
+            {/* AI Background Removal with Trial Limits */}
+            <div className={`tool-card ${lockedTools.backgroundRemoval?.locked ? 'locked' : ''}`}>
+              <div 
+                className="tool-header clickable"
+                onClick={() => toggleCard('backgroundRemoval')}
+              >
+                <div className="tool-icon">
+                  {lockedTools.backgroundRemoval?.locked ? '🔒' : '🚀'}
+                </div>
                 <div className="tool-info">
-                  <h3>U-2-Net Professional AI</h3>
-                  <p>Remove.bg quality • Industry-grade • Offline & free</p>
+                  <h3>
+                    AI Background Removal
+                    {lockedTools.backgroundRemoval?.locked && <span className="lock-badge">TRIAL LIMIT REACHED</span>}
+                  </h3>
+                  <p>
+                    {lockedTools.backgroundRemoval?.locked 
+                      ? lockedTools.backgroundRemoval.upgradePrompt?.message || "Upgrade to remove unlimited backgrounds"
+                      : "Professional U-2-Net AI • Remove.bg quality • Industry-grade"
+                    }
+                  </p>
+                </div>
+                <div className={`expand-arrow ${expandedCards.backgroundRemoval ? 'expanded' : ''} ${lockedTools.backgroundRemoval?.locked ? 'locked' : ''}`}>
+                  {lockedTools.backgroundRemoval?.locked ? '🔒' : '▼'}
                 </div>
               </div>
               
-              <div className="tool-content" style={{ paddingTop: '0', paddingBottom: '15px' }}>
-                <div className="u2net-features">
-                  <h4 style={{ color: '#40e0ff', fontSize: '14px', marginBottom: '10px' }}>
-                    🚀 SMART AUTO-DETECTION + Polish Layer
-                  </h4>
-                  <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.4' }}>
-                    <div style={{ marginBottom: '8px' }}>✅ AI automatically detects image content</div>
-                    <div style={{ marginBottom: '8px' }}>✅ Chooses optimal model (Human/Animal/Object)</div>
-                    <div style={{ marginBottom: '8px' }}>✅ Auto contrast & edge enhancement</div>
-                    <div style={{ marginBottom: '8px' }}>✅ Post-processing cleanup & recovery</div>
-                    <div style={{ marginBottom: '8px' }}>✅ Zero manual selection required</div>
+              {lockedTools.backgroundRemoval?.locked ? (
+                <div className="premium-upgrade-panel">
+                  <div className="upgrade-content">
+                    <div className="upgrade-icon">🚀</div>
+                    <h4>{lockedTools.backgroundRemoval.upgradePrompt?.title}</h4>
+                    <p>{lockedTools.backgroundRemoval.upgradePrompt?.message}</p>
+                    <button className="premium-upgrade-button">
+                      {lockedTools.backgroundRemoval.upgradePrompt?.cta || 'Unlock Pro Background Removal'}
+                    </button>
                   </div>
                 </div>
-              </div>
-              
-              <button 
-                className="tool-button"
-                onClick={async () => {
-                  console.log('� U-2-Net PROFESSIONAL BACKGROUND REMOVAL STARTED!');
+              ) : expandedCards.backgroundRemoval && (
+                <div className="tool-content">
+                  <div className="u2net-features">
+                    <h4 style={{ color: '#40e0ff', fontSize: '14px', marginBottom: '10px' }}>
+                      🚀 SMART AUTO-DETECTION + Polish Layer
+                    </h4>
+                    <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.4' }}>
+                      <div style={{ marginBottom: '8px' }}>✅ AI automatically detects image content</div>
+                      <div style={{ marginBottom: '8px' }}>✅ Chooses optimal model (Human/Animal/Object)</div>
+                      <div style={{ marginBottom: '8px' }}>✅ Auto contrast & edge enhancement</div>
+                      <div style={{ marginBottom: '8px' }}>✅ Post-processing cleanup & recovery</div>
+                      <div style={{ marginBottom: '8px' }}>✅ Zero manual selection required</div>
+                    </div>
+                  </div>
                   
-                  if (!originalImage) {
-                    alert('Please upload an image first!');
-                    return;
-                  }
-                  
-                  try {
-                    setIsProcessing(true);
-                    setShowBgRemovalProgress(true);
-                    console.log('✅ Processing started with U-2-Net');
-                    
-                    console.log('🔄 Calling U-2-Net background removal...');
-                    const result = await imageProcessor.filter(originalImage, 'remove-bg');
-                    
-                    console.log('✅ U-2-Net background removal completed!', result ? 'HAS_RESULT' : 'NO_RESULT');
-                    
-                    if (result) {
-                      setProcessedImage(result);
-                      setProcessedFormat('png');
-                      alert('🚀 Professional background removal complete!\n\nRemove.bg quality results with perfect edge detection.');
-                    } else {
-                      alert('Background removal returned empty result');
-                    }
-                    
-                  } catch (error) {
-                    console.error('❌ U-2-Net background removal failed:', error);
-                    alert('Background removal failed: ' + error.message);
-                  } finally {
-                    setIsProcessing(false);
-                    setShowBgRemovalProgress(false);
-                    console.log('✅ U-2-Net processing finished');
-                  }
-                }}
-                disabled={!originalImage || isProcessing}
-              >
-                {isProcessing ? '🧠 SMART AI Processing...' : '🚀 SMART Background Removal'}
-              </button>
+                  <button 
+                    className={`tool-button ${isProcessing ? 'processing' : 'ready'}`}
+                    onClick={() => handleFilter('remove-bg')}
+                    disabled={!originalImage || isProcessing}
+                  >
+                    {isProcessing ? '🧠 SMART AI Processing...' : '🚀 SMART Background Removal'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
