@@ -1,0 +1,214 @@
+/* Professional Background Removal Progress Indicator */
+.bg-removal-progress-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeInOverlay 0.3s ease-out;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bg-removal-progress-container {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bg-removal-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.bg-removal-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.bg-removal-header h3 {
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+}
+
+.bg-removal-header p {
+  color: #8892b0;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.bg-removal-stages {
+  margin-bottom: 25px;
+}
+
+.stage-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+.stage-item.active {
+  color: #00d4ff;
+  transform: translateX(5px);
+}
+
+.stage-item.completed {
+  color: #10b981;
+}
+
+.stage-icon {
+  font-size: 1.2rem;
+  margin-right: 12px;
+  width: 20px;
+  text-align: center;
+}
+
+.stage-label {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.stage-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #334155;
+  border-top: 2px solid #00d4ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.bg-removal-progress-bar {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.progress-track {
+  background: #1e293b;
+  border-radius: 10px;
+  height: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00d4ff 0%, #0ea5e9 50%, #06b6d4 100%);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-text {
+  text-align: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-top: 10px;
+}
+
+.bg-removal-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.processing-indicator {
+  display: flex;
+  align-items: center;
+  color: #8892b0;
+  font-size: 0.9rem;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #00d4ff;
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: pulseGlow 1.5s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 6px rgba(0, 212, 255, 0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .bg-removal-progress-container {
+    padding: 20px;
+    max-width: 95%;
+  }
+  
+  .bg-removal-header h3 {
+    font-size: 1.2rem;
+  }
+  
+  .stage-item {
+    padding: 6px 0;
+  }
+}

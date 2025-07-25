@@ -1,5 +1,6 @@
 // Image processing utilities
 import { canvasHelpers } from './canvasHelpers';
+import { professionalBackgroundRemover } from './professionalBackgroundRemover';
 
 export const imageProcessor = {
   // Resize an image to new dimensions
@@ -24,53 +25,42 @@ export const imageProcessor = {
     });
   },
 
-  // Remove background using edge detection
-  removeBackground(image) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+  // Professional AI-powered background removal (like remove.bg)
+  async removeBackground(image, options = {}) {
+    console.log('🤖 Starting professional background removal...');
     
-    canvas.width = image.width;
-    canvas.height = image.height;
-    
-    ctx.drawImage(image, 0, 0);
-    
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    
-    // Simple background removal (removes pixels similar to corners)
-    const cornerColor = {
-      r: data[0],
-      g: data[1], 
-      b: data[2]
-    };
-    
-    const threshold = 50;
-    
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
+    try {
+      // Use the professional AI-powered remover
+      const result = await professionalBackgroundRemover.removeBackground(image, {
+        onProgress: options.onProgress || ((key, current, total) => {
+          const percent = Math.round((current / total) * 100);
+          console.log(`🔄 AI Processing: ${key} - ${percent}%`);
+          
+          // Dispatch progress event for UI updates
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('backgroundRemovalProgress', {
+              detail: { key, current, total, percent }
+            }));
+          }
+        })
+      });
       
-      const diff = Math.abs(r - cornerColor.r) + 
-                   Math.abs(g - cornerColor.g) + 
-                   Math.abs(b - cornerColor.b);
+      // Convert result to Image object for compatibility
+      return new Promise((resolve) => {
+        const processedImage = new Image();
+        processedImage.onload = () => {
+          processedImage.width = processedImage.naturalWidth;
+          processedImage.height = processedImage.naturalHeight;
+          console.log('✅ Professional background removal complete');
+          resolve(processedImage);
+        };
+        processedImage.src = result;
+      });
       
-      if (diff < threshold) {
-        data[i + 3] = 0; // Make transparent
-      }
+    } catch (error) {
+      console.error('❌ Professional background removal failed:', error);
+      throw new Error(`Background removal failed: ${error.message}`);
     }
-    
-    ctx.putImageData(imageData, 0, 0);
-    
-    return new Promise((resolve) => {
-      const processedImage = new Image();
-      processedImage.onload = () => {
-        processedImage.width = canvas.width;
-        processedImage.height = canvas.height;
-        resolve(processedImage);
-      };
-      processedImage.src = canvas.toDataURL('image/png');
-    });
   },
 
   // Apply color filters

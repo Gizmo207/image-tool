@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { imageProcessor } from '../../utils/imageProcessor';
 import GifCreatorInterface from '../gif/GifCreatorInterface';
+import BackgroundRemovalProgress from '../ui/BackgroundRemovalProgress';
 import './PremiumSidebar.css';
 import '../gif/GifCreatorInterface.css';
 
@@ -24,6 +25,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const [processingTimeout, setProcessingTimeout] = useState(null);
   const [isVideoFile, setIsVideoFile] = useState(false); // Track if uploaded file is video
   const [isGifCreating, setIsGifCreating] = useState(false); // Track if GIF is being created
+  const [showBgRemovalProgress, setShowBgRemovalProgress] = useState(false); // Track background removal progress
   const fileInputRef = useRef(null);
   
   // Collapsible tool card states
@@ -293,14 +295,30 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const handleFilter = async (filterType) => {
     if (!originalImage) return;
     
+    // Special handling for AI background removal
+    if (filterType === 'remove-bg') {
+      setShowBgRemovalProgress(true);
+    }
+    
     setIsProcessing(true);
     try {
       const filteredDataUrl = await imageProcessor.filter(originalImage, filterType);
       setProcessedImage(filteredDataUrl);
       setProcessedFormat('png'); // Reset to PNG after filter
+      
+      // Hide progress indicator after completion
+      if (filterType === 'remove-bg') {
+        setTimeout(() => {
+          setShowBgRemovalProgress(false);
+        }, 1500);
+      }
     } catch (error) {
       console.error('Filter failed:', error);
-      alert('Failed to apply filter. Please try again.');
+      alert(`Failed to apply ${filterType === 'remove-bg' ? 'AI background removal' : 'filter'}. Please try again.`);
+      
+      if (filterType === 'remove-bg') {
+        setShowBgRemovalProgress(false);
+      }
     }
     setIsProcessing(false);
   };
@@ -761,10 +779,10 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
             {/* AI Background Removal - Standalone Tool */}
             <div className="tool-card">
               <div className="tool-header">
-                <div className="tool-icon">✂️</div>
+                <div className="tool-icon">🏆</div>
                 <div className="tool-info">
-                  <h3>AI Background Removal</h3>
-                  <p>Automatically remove backgrounds with AI technology</p>
+                  <h3>Google MediaPipe Background Removal</h3>
+                  <p>BEST free AI • Professional quality • No limits</p>
                 </div>
               </div>
               
@@ -773,7 +791,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                 onClick={() => handleFilter('remove-bg')}
                 disabled={isProcessing}
               >
-                {isProcessing ? '🔄 Processing...' : '✂️ Remove Background'}
+                {isProcessing ? '🏆 AI Processing...' : '🏆 Remove Background (FREE)'}
               </button>
             </div>
           </div>
@@ -787,6 +805,12 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
           </div>
         </section>
       </div>
+
+      {/* Professional Background Removal Progress */}
+      <BackgroundRemovalProgress 
+        isVisible={showBgRemovalProgress}
+        onComplete={() => setShowBgRemovalProgress(false)}
+      />
     </div>
   );
 };
