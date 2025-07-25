@@ -11,9 +11,9 @@
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
-  height: 100vh; /* Fixed height instead of min-height */
+  min-height: 100vh; /* Changed back to min-height */
   color: #ffffff;
-  overflow: hidden; /* Completely prevent scrolling on body */
+  overflow-x: hidden; /* Only prevent horizontal scrolling */
 }
 
 /* Smooth scrolling */
@@ -22,20 +22,20 @@ html {
 }
 
 #root {
-  height: 100vh; /* Fixed height instead of min-height */
+  min-height: 100vh; /* Changed back to min-height */
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Prevent root from scrolling */
+  overflow-x: hidden; /* Only prevent horizontal scrolling */
 }
 
 /* Premium Layout */
 .app {
   display: flex;
   flex-direction: column; /* Stack header, main, footer vertically */
-  height: 100vh; /* Fixed height instead of min-height */
+  min-height: 100vh; /* Changed back to min-height */
   background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
   color: #ffffff;
-  overflow: hidden; /* Prevent app from scrolling */
+  overflow-x: hidden; /* Only prevent horizontal scrolling */
 }
 
 .main-content {
