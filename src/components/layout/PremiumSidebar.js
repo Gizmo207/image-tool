@@ -314,6 +314,7 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                 <button 
                   className={`format-btn ${selectedFormat === 'gif' ? 'selected' : ''}`}
                   onClick={() => handleFormatSelect('gif')}
+                  title="Create GIF - Upload video/multiple images for animation, or single image for static GIF"
                 >
                   GIF
                 </button>

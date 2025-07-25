@@ -36,8 +36,19 @@ export const formatSupport = {
 
   // Get supported formats
   getSupportedFormats() {
-    const formats = ['png', 'jpg', 'webp'];
+    const formats = ['png', 'jpg', 'webp']; // Removed GIF - not supported by canvas for creation
     return formats.filter(format => this.supportsFormat(format));
+  },
+
+  // Explain format usage
+  getFormatInfo(format) {
+    const info = {
+      png: 'Best for: Images with transparency, logos, graphics',
+      jpg: 'Best for: Photos, images without transparency',  
+      webp: 'Best for: Modern web images, good compression',
+      gif: 'Best for: Animated images only (not static conversion)'
+    };
+    return info[format.toLowerCase()] || 'Unknown format';
   },
 
   // Test data URL validity
