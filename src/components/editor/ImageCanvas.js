@@ -1,10 +1,11 @@
 import React from 'react';
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
+import GifProgressBar from '../ui/GifProgressBar';
 import { downloadManager } from '../../utils/downloadManager';
 import { formatSupport } from '../../utils/formatSupport';
 
-const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFormat = 'png', hasProLicense }) => {
+const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFormat = 'png', hasProLicense, gifProgress }) => {
   console.log('🖼️ ImageCanvas render:', { 
     hasOriginal: !!originalImage, 
     hasProcessed: !!processedImage, 
@@ -142,6 +143,12 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
           <div className="image-preview">
             {isProcessing ? (
               <Loading text="Processing your image..." />
+            ) : gifProgress?.isCreating ? (
+              <GifProgressBar 
+                progress={gifProgress.progress}
+                message={gifProgress.message}
+                isActive={true}
+              />
             ) : processedImage ? (
               <img 
                 src={processedImage} 

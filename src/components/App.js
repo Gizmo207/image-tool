@@ -14,6 +14,7 @@ function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedFormat, setProcessedFormat] = useState('png'); // Track the format of processed image
   const [hasProLicense] = useState(LicenseManager.checkLicense());
+  const [gifProgress, setGifProgress] = useState({ isCreating: false, progress: 0, message: '' });
 
   // Debug wrapper for setProcessedImage
   const handleSetProcessedImage = (image) => {
@@ -108,6 +109,7 @@ function App() {
           isProcessing={isProcessing}
           setProcessedFormat={setProcessedFormat}
           hasProLicense={hasProLicense}
+          onGifProgressUpdate={setGifProgress}
         />
         
         <div className="editor-area">
@@ -117,6 +119,7 @@ function App() {
             isProcessing={isProcessing}
             processedFormat={processedFormat}
             hasProLicense={hasProLicense}
+            gifProgress={gifProgress}
           />
         </div>
       </main>

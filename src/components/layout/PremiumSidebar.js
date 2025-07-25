@@ -5,7 +5,7 @@ import GifCreatorInterface from '../gif/GifCreatorInterface';
 import './PremiumSidebar.css';
 import '../gif/GifCreatorInterface.css';
 
-const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIsProcessing, isProcessing, setProcessedFormat, hasProLicense }) => {
+const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIsProcessing, isProcessing, setProcessedFormat, hasProLicense, onGifProgressUpdate }) => {
   console.log('🎨 PremiumSidebar render:', { 
     hasOriginalImage: !!originalImage, 
     originalImageDimensions: originalImage ? `${originalImage.width}x${originalImage.height}` : 'none',
@@ -570,6 +570,9 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                 onError={(errorMessage) => {
                   console.error('❌ GIF creation error:', errorMessage);
                   alert('GIF creation failed: ' + errorMessage);
+                }}
+                onProgressUpdate={(progressData) => {
+                  onGifProgressUpdate?.(progressData);
                 }}
               />
             </div>

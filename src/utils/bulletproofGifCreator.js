@@ -4,7 +4,7 @@ import gifshot from 'gifshot';
 export const bulletproofGifCreator = {
   
   // Create GIF from video with user-specified parameters
-  async createGifFromVideo(videoFile, options = {}) {
+  async createGifFromVideo(videoFile, options = {}, progressCallback = null) {
     const {
       startTime = 0,      // When to start in the video (seconds)
       duration = 3,       // How long the GIF should be (seconds) 
@@ -73,6 +73,7 @@ export const bulletproofGifCreator = {
             if (currentFrame >= frameCount) {
               console.log('📸 All frames captured, creating GIF...');
               console.log('Frame data lengths:', frames.map(f => f.length));
+              progressCallback?.(1.0); // 100% frame capture complete
               createGifFromFrames(frames, frameDelay)
                 .then(resolve)
                 .catch(reject);
@@ -96,6 +97,10 @@ export const bulletproofGifCreator = {
                 console.log(`✅ Frame ${currentFrame + 1} captured (${imageData.length} bytes)`);
                 
                 currentFrame++;
+                
+                // Report progress
+                const frameProgress = currentFrame / frameCount;
+                progressCallback?.(frameProgress);
                 
                 // Small delay before next frame
                 setTimeout(captureFrame, 150);

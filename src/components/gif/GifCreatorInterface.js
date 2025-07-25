@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { bulletproofGifCreator } from '../../utils/bulletproofGifCreator';
 
-const GifCreatorInterface = ({ videoFile, onGifCreated, onError }) => {
+const GifCreatorInterface = ({ videoFile, onGifCreated, onError, onProgressUpdate }) => {
   const [videoInfo, setVideoInfo] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [progress, setProgress] = useState('');
+  const [progressPercent, setProgressPercent] = useState(0);
   
   // User settings
   const [startTime, setStartTime] = useState(0);
@@ -50,6 +51,8 @@ const GifCreatorInterface = ({ videoFile, onGifCreated, onError }) => {
     
     setIsCreating(true);
     setProgress('🎬 Starting GIF creation...');
+    setProgressPercent(0);
+    onProgressUpdate?.({ isCreating: true, progress: 0, message: '🎬 Starting GIF creation...' });
     
     try {
       const options = {
@@ -63,22 +66,51 @@ const GifCreatorInterface = ({ videoFile, onGifCreated, onError }) => {
       
       console.log('🎯 Creating GIF with options:', options);
       setProgress('📸 Capturing video frames...');
+      setProgressPercent(20);
+      onProgressUpdate?.({ isCreating: true, progress: 20, message: '📸 Capturing video frames...' });
       
-      const gifDataUrl = await bulletproofGifCreator.createGifFromVideo(videoFile, options);
+      const gifDataUrl = await bulletproofGifCreator.createGifFromVideo(videoFile, options, (frameProgress) => {
+        // Frame capture progress (20% to 60%)
+        const captureProgress = 20 + (frameProgress * 40);
+        setProgressPercent(captureProgress);
+        onProgressUpdate?.({ isCreating: true, progress: captureProgress, message: `📸 Capturing frame ${Math.round(frameProgress * 100)}%...` });
+      });
+      
+      setProgress('🎬 Encoding GIF...');
+      setProgressPercent(60);
+      onProgressUpdate?.({ isCreating: true, progress: 60, message: '🎬 Encoding GIF...' });
+      
+      // Simulate encoding progress
+      for (let i = 60; i <= 95; i += 5) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setProgressPercent(i);
+        onProgressUpdate?.({ isCreating: true, progress: i, message: '🎬 Encoding GIF...' });
+      }
       
       setProgress('✅ GIF created successfully!');
+      setProgressPercent(100);
+      onProgressUpdate?.({ isCreating: true, progress: 100, message: '✅ GIF created successfully!' });
       onGifCreated?.(gifDataUrl);
       
       // Clear progress after 2 seconds
-      setTimeout(() => setProgress(''), 2000);
+      setTimeout(() => {
+        setProgress('');
+        setProgressPercent(0);
+        onProgressUpdate?.({ isCreating: false, progress: 0, message: '' });
+      }, 2000);
       
     } catch (error) {
       console.error('❌ GIF creation failed:', error);
       setProgress('❌ Failed to create GIF');
+      setProgressPercent(0);
+      onProgressUpdate?.({ isCreating: false, progress: 0, message: '❌ Failed to create GIF' });
       onError?.(error.message);
       
       // Clear error after 3 seconds
-      setTimeout(() => setProgress(''), 3000);
+      setTimeout(() => {
+        setProgress('');
+        onProgressUpdate?.({ isCreating: false, progress: 0, message: '' });
+      }, 3000);
       
     } finally {
       setIsCreating(false);
