@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ErrorBoundary from './ErrorBoundary';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import PremiumSidebar from './layout/PremiumSidebar';
@@ -127,7 +128,8 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <ErrorBoundary>
+      <div className="app">
       {showFirstRun && (
         <FirstRunExperience onComplete={handleFirstRunComplete} />
       )}
@@ -159,7 +161,8 @@ function App() {
       </main>
       
       <Footer />
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }
 
