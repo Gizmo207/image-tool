@@ -245,10 +245,20 @@ export const imageProcessor = {
   },
 
   // Comprehensive filter system with value-based adjustments
-  filter(image, filterType, value = null) {
+  async filter(image, filterType, value = null) {
+    console.log('🎨 Applying filter:', filterType, 'value:', value);
+    
+    // Handle special async cases first
+    if (filterType === 'remove-bg') {
+      try {
+        const processedImage = await this.removeBackground(image);
+        return processedImage.src;
+      } catch (error) {
+        throw error;
+      }
+    }
+    
     return new Promise((resolve) => {
-      console.log('🎨 Applying filter:', filterType, 'value:', value);
-      
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       
@@ -331,12 +341,6 @@ export const imageProcessor = {
           // Sharpening requires pixel manipulation
           this.applySharpening(ctx, image, intensity);
           resolve(canvas.toDataURL('image/png'));
-          return;
-          
-        case 'remove-bg':
-          // Use existing background removal
-          const processed = this.removeBackground(image);
-          resolve(processed.src);
           return;
           
         default:
