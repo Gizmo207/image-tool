@@ -238,11 +238,26 @@ export const imageProcessor = {
     });
   },
 
-  // Convert file to GIF (handles both images and videos)
+  // Convert file to GIF (only handles video files now)
   async convertToGif(file) {
-    if (gifCreator.isVideoFile(file)) {
+    console.log('🎨 ImageProcessor: Starting GIF conversion for:', {
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: Math.round(file.size / 1024) + 'KB'
+    });
+
+    try {
+      if (!gifCreator.isVideoFile(file)) {
+        throw new Error('GIF conversion is only supported for video files');
+      }
+
+      console.log('🎥 Processing video file...');
+      
       // Convert video to animated GIF
+      console.log('📹 Getting video information...');
       const videoInfo = await gifCreator.getVideoInfo(file);
+      console.log('📹 Video info retrieved:', videoInfo);
+      
       const options = {
         startTime: 0,
         duration: Math.min(videoInfo.duration, 10), // Max 10 seconds
@@ -251,22 +266,23 @@ export const imageProcessor = {
         height: Math.min(videoInfo.height, 360) // Max height 360px
       };
       
-      return await gifCreator.createGifFromVideo(file, options);
-    } else {
-      // Convert static image to GIF
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = async () => {
-          try {
-            const gifDataUrl = await gifCreator.createStaticGif(img);
-            resolve(gifDataUrl);
-          } catch (error) {
-            reject(error);
-          }
-        };
-        img.onerror = reject;
-        img.src = URL.createObjectURL(file);
+      console.log('⚙️ Using conversion options:', options);
+      console.log('🎬 Starting video to GIF conversion (this may take 30-60 seconds)...');
+      
+      // Add timeout wrapper
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('GIF conversion timeout after 60 seconds - file might be too large or complex'));
+        }, 60000);
       });
+      
+      const conversionPromise = gifCreator.createGifFromVideo(file, options);
+      
+      return await Promise.race([conversionPromise, timeoutPromise]);
+      
+    } catch (error) {
+      console.error('❌ GIF conversion failed:', error);
+      throw error;
     }
   }
 };

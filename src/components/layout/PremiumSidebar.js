@@ -18,6 +18,9 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const [conversionSuccess, setConversionSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [originalFile, setOriginalFile] = useState(null); // Store original file for GIF conversion
+  const [processingStatus, setProcessingStatus] = useState(''); // Show current processing step
+  const [processingTimeout, setProcessingTimeout] = useState(null);
+  const [isVideoFile, setIsVideoFile] = useState(false); // Track if uploaded file is video
   const fileInputRef = useRef(null);
 
   // Update custom dimensions when image changes
@@ -40,11 +43,12 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
     if (isValidFile) {
       console.log('✅ Valid file, calling onImageUpload');
       setOriginalFile(file); // Store the original file
+      setIsVideoFile(file.type.startsWith('video/')); // Track if it's a video
       onImageUpload(file);
       setActiveTab('resize');
     } else {
       console.log('❌ Invalid file type:', file?.type);
-      alert('Please select a valid image file (JPG, PNG, GIF, WebP) or video file for GIF conversion');
+      alert('Please select a valid image file (JPG, PNG, WebP) or video file for GIF conversion');
     }
   };
 
@@ -102,17 +106,56 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
   const handleFormatConvert = async () => {
     if (!originalImage || !selectedFormat) return;
     
+    console.log('🚀 Starting format conversion:', {
+      format: selectedFormat,
+      hasOriginalFile: !!originalFile,
+      originalFileType: originalFile?.type,
+      imageSize: originalImage ? `${originalImage.width}x${originalImage.height}` : 'unknown'
+    });
+    
     setIsProcessing(true);
     setConversionSuccess(false);
+    setProcessingStatus('Initializing conversion...');
+    
+    // Set up timeout monitoring
+    const timeout = setTimeout(() => {
+      console.warn('⚠️ Processing taking longer than expected...');
+      setProcessingStatus('Processing is taking longer than expected. Please check console for details.');
+    }, 10000);
+    
+    setProcessingTimeout(timeout);
+    
     try {
       let convertedDataUrl;
       
-      // Handle GIF conversion specially for video files or image files
-      if (selectedFormat.toLowerCase() === 'gif' && originalFile) {
+      // Handle GIF conversion - only for video files
+      if (selectedFormat.toLowerCase() === 'gif') {
+        if (!isVideoFile || !originalFile) {
+          throw new Error('GIF conversion is only available for video files');
+        }
+        
+        console.log('🎬 Converting video to GIF...');
+        setProcessingStatus('📹 Loading video information...');
+        await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UI update
+        
+        setProcessingStatus('🎬 Converting video to GIF frames...');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        setProcessingStatus('⚙️ This may take 30-60 seconds for video files...');
+        
         convertedDataUrl = await imageProcessor.convertToGif(originalFile);
+        console.log('✅ GIF conversion completed successfully');
+        
       } else {
+        console.log('🖼️ Converting to standard format...');
+        setProcessingStatus(`Converting to ${selectedFormat.toUpperCase()}...`);
+        
         convertedDataUrl = await imageProcessor.convert(originalImage, selectedFormat);
+        console.log('✅ Standard format conversion completed');
       }
+      
+      clearTimeout(timeout);
+      setProcessingStatus('Finalizing...');
       
       setProcessedImage(convertedDataUrl);
       setProcessedFormat(selectedFormat); // Update the format state
@@ -120,10 +163,12 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
       // Show success feedback
       setConversionSuccess(true);
       
-      if (selectedFormat.toLowerCase() === 'gif' && originalFile?.type.startsWith('video/')) {
+      if (selectedFormat.toLowerCase() === 'gif') {
         setSuccessMessage(`✨ Successfully converted video to animated GIF! Your GIF is ready to download. 📥`);
+        console.log('🎉 Video to GIF conversion successful!');
       } else {
         setSuccessMessage(`✨ Successfully converted to ${selectedFormat.toUpperCase()}! Your image is ready to download. 📥`);
+        console.log('🎉 Format conversion successful!');
       }
       
       // Auto-hide success message after 5 seconds
@@ -133,10 +178,31 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
       }, 5000);
       
     } catch (error) {
-      console.error('Format conversion failed:', error);
-      alert('Failed to convert format. Please try again.');
+      clearTimeout(timeout);
+      console.error('❌ Format conversion failed:', error);
+      
+      let errorMessage = 'Failed to convert format. ';
+      
+      if (error.message.includes('timeout')) {
+        errorMessage += 'The process timed out - try a smaller file or shorter video.';
+      } else if (error.message.includes('corrupted')) {
+        errorMessage += 'The file appears to be corrupted or in an unsupported format.';
+      } else if (error.message.includes('memory')) {
+        errorMessage += 'Not enough memory - try a smaller file.';
+      } else {
+        errorMessage += 'Please check the console for details and try again.';
+      }
+      
+      alert(errorMessage);
+      setProcessingStatus('');
+    } finally {
+      setIsProcessing(false);
+      setProcessingStatus('');
+      if (processingTimeout) {
+        clearTimeout(processingTimeout);
+        setProcessingTimeout(null);
+      }
     }
-    setIsProcessing(false);
   };
 
   const handleFilter = async (filterType) => {
@@ -196,8 +262,8 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
               {originalImage ? 'Image Loaded - Upload New' : 'Drop image here or click to browse'}
             </div>
             <div className="upload-hint">
-              Supports JPG, PNG, GIF, WebP images up to 10MB<br/>
-              <strong>New:</strong> Upload video files for animated GIF creation!
+              Supports JPG, PNG, WebP images up to 10MB<br/>
+              <strong>Video files:</strong> Upload MP4/MOV for animated GIF creation!
             </div>
             
             {!originalImage && (
@@ -335,11 +401,12 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                   WebP
                 </button>
                 <button 
-                  className={`format-btn ${selectedFormat === 'gif' ? 'selected' : ''}`}
-                  onClick={() => handleFormatSelect('gif')}
-                  title="Create GIF - Upload video/multiple images for animation, or single image for static GIF"
+                  className={`format-btn ${selectedFormat === 'gif' ? 'selected' : ''} ${!isVideoFile ? 'disabled' : ''}`}
+                  onClick={() => isVideoFile ? handleFormatSelect('gif') : null}
+                  disabled={!isVideoFile}
+                  title={isVideoFile ? "Create animated GIF from video" : "GIF conversion only available for video files - upload a video to enable"}
                 >
-                  GIF
+                  GIF {!isVideoFile && '(Video Only)'}
                 </button>
               </div>
               
@@ -349,11 +416,18 @@ const PremiumSidebar = ({ onImageUpload, originalImage, setProcessedImage, setIs
                 disabled={!selectedFormat || !originalImage || isProcessing}
               >
                 {isProcessing ? (
-                  <>🔄 Converting...</>
+                  <>🔄 {processingStatus || 'Converting...'}</>
                 ) : (
                   <>🔄 Convert to {selectedFormat ? selectedFormat.toUpperCase() : 'Format'}</>
                 )}
               </button>
+              
+              {processingStatus && isProcessing && (
+                <div className="processing-status">
+                  <div className="status-message">{processingStatus}</div>
+                  <div className="status-hint">💡 Check browser console (F12) for detailed progress</div>
+                </div>
+              )}
               
               {conversionSuccess && (
                 <div className="success-notification">
