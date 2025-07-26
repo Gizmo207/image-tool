@@ -58,3 +58,17 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+
+# Electron build outputs
+dist-electron/
+release/
+
+# Large model files
+u2net/u2net.pth
+
+# Test and development files
+playwright-report/
+test-results/
+
+# Firebase hosting files
+.firebase/

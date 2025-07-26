@@ -51,7 +51,7 @@ The SnapForge Test Gauntlet is a comprehensive automated testing framework that 
 npm install @playwright/test
 
 # Generate test assets
-npm run generate-assets
+node scripts/generate-test-assets.js
 
 # Install Playwright browsers
 npx playwright install
@@ -136,19 +136,19 @@ npm run test:report
 
 ## 🎮 Test Runner Features
 
-The custom test runner (`test-runner.js`) provides:
+The custom test runner (`scripts/test-runner.js`) provides:
 
 ### Command Line Interface
 ```bash
 # Show help
-node test-runner.js --help
+node scripts/test-runner.js --help
 
 # Run specific test suites
-node test-runner.js --quick
-node test-runner.js --license
-node test-runner.js --checkout
-node test-runner.js --trial
-node test-runner.js --first
+node scripts/test-runner.js --quick
+node scripts/test-runner.js --license
+node scripts/test-runner.js --checkout
+node scripts/test-runner.js --trial
+node scripts/test-runner.js --first
 ```
 
 ### Automated Reporting
@@ -245,7 +245,7 @@ test.describe('Feature Name', () => {
 **Tests fail with timeout errors**
 - Ensure development server is running on `http://localhost:3001`
 - Check browser installations: `npx playwright install`
-- Verify test assets exist: `npm run generate-assets`
+- Verify test assets exist: `node scripts/generate-test-assets.js`
 
 **Cross-browser inconsistencies**
 - Review browser-specific selectors
@@ -272,8 +272,8 @@ npx playwright test tests/snapforge-quick-validation.spec.js --headed --debug
 ## 📚 Resources
 
 - [Playwright Documentation](https://playwright.dev/)
-- [SnapForge Development Guide](./DEVELOPMENT.md)
-- [Test Asset Generation](./generate-test-assets.js)
+- [SnapForge Project Structure](./PROJECT-STRUCTURE.md)
+- [Test Asset Generation](./scripts/generate-test-assets.js)
 - [HTML Test Reports](./playwright-report/index.html)
 
 ## 🎉 Success Metrics
