@@ -14,6 +14,13 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
   });
   
   const handleDownload = () => {
+    console.log('🔽 DOWNLOAD STARTED:', { 
+      hasProcessedImage: !!processedImage, 
+      processedFormat,
+      processedImageType: typeof processedImage,
+      processedImageLength: processedImage?.length || 0
+    });
+    
     if (processedImage) {
       // For GIFs, download directly without canvas conversion to preserve animation
       if (processedFormat.toLowerCase() === 'gif') {
@@ -119,6 +126,9 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
       };
       
       tempImg.src = processedImage;
+    } else {
+      console.warn('⚠️ No processed image to download');
+      alert('No processed image to download. Please select and process an image first.');
     }
   };
 
@@ -178,7 +188,13 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
       {/* Download controls moved outside and below the grid */}
       {processedImage && !isProcessing && (
         <div className="download-section">
-          <Button onClick={handleDownload} variant="success">
+          <Button 
+            onClick={() => {
+              console.log('🔽 Download button clicked! Starting download process...');
+              handleDownload();
+            }} 
+            variant="success"
+          >
             💾 Download {processedFormat.toLowerCase() === 'gif' ? 'GIF' : 'Image'}
           </Button>
           {!hasProLicense && (
@@ -186,6 +202,22 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
               Free version includes watermark
             </p>
           )}
+        </div>
+      )}
+      
+      {/* Debug info for development */}
+      {window.location.hostname === 'localhost' && (
+        <div style={{ 
+          fontSize: '10px', 
+          color: '#666', 
+          marginTop: '10px',
+          padding: '5px',
+          background: 'rgba(0,0,0,0.1)',
+          borderRadius: '3px'
+        }}>
+          Debug: processedImage={!!processedImage ? 'YES' : 'NO'} | 
+          isProcessing={isProcessing ? 'YES' : 'NO'} | 
+          format={processedFormat}
         </div>
       )}
     </div>
