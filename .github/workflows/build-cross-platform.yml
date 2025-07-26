@@ -4,115 +4,86 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to build'
-        required: true
-        default: '1.0.1'
 
 jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        include:
-          - os: windows-latest
-            platform: win
-            arch: x64
-            ext: .exe
-            artifact: SnapForge-Setup.exe
-          - os: macos-latest
-            platform: mac
-            arch: x64
-            ext: .dmg
-            artifact: SnapForge.dmg
-          - os: ubuntu-latest
-            platform: linux
-            arch: x64
-            ext: .AppImage
-            artifact: SnapForge.AppImage
-
+        os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Generate License Keys for Customers
-      run: node scripts/generate-test-license.js
+      - name: Generate License Keys for Customers
+        run: node scripts/generate-test-license.js
 
-    - name: Build Electron App
-      run: npm run build:${{ matrix.platform }}
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build SnapForge
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            npm run build:win
+          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+            npm run build:mac
+          elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            npm run build:linux
+          fi
 
-    - name: Create Customer Package
-      shell: bash
-      run: |
-        mkdir -p customer-package
-        if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          cp dist-electron/*.exe customer-package/ || true
-          cp config/test-license-keys.json customer-package/license-keys.json
-        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-          cp dist-electron/*.dmg customer-package/ || true
-          cp config/test-license-keys.json customer-package/license-keys.json
-        else
-          cp dist-electron/*.AppImage customer-package/ || true
-          cp config/test-license-keys.json customer-package/license-keys.json
-        fi
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SnapForge-${{ matrix.os }}
+          path: |
+            dist-electron/**/*.exe
+            dist-electron/**/*.dmg
+            dist-electron/**/*.AppImage
+            config/test-license-keys.json
 
-    - name: Upload Customer Package
-      uses: actions/upload-artifact@v4
-      with:
-        name: SnapForge-${{ matrix.platform }}-customer-package
-        path: customer-package/
-
-    - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          dist-electron/**/*.exe
-          dist-electron/**/*.dmg
-          dist-electron/**/*.AppImage
-          config/test-license-keys.json
-        tag_name: ${{ github.ref_name }}
-        name: SnapForge ${{ github.ref_name }}
-        body: |
-          🎉 SnapForge ${{ github.ref_name }} Release
-          
-          ## What's New
-          - ✅ Cross-platform desktop application
-          - ✅ Production-grade license system
-          - ✅ Auto-updater integration
-          - ✅ Premium background removal features
-          - ✅ Professional image editing tools
-          
-          ## Download Instructions
-          1. Download the appropriate file for your operating system:
-             - **Windows**: `SnapForge-Setup.exe`
-             - **macOS**: `SnapForge.dmg`
-             - **Linux**: `SnapForge.AppImage`
-          
-          2. Install and run the application
-          
-          3. Use the provided license keys from `config/test-license-keys.json` to activate premium features
-          
-          ## Customer Ready
-          This release includes customer-ready packages with license keys for immediate deployment.
-          
-          🚀 Ready for business!
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist-electron/**/*.exe
+            dist-electron/**/*.dmg
+            dist-electron/**/*.AppImage
+            config/test-license-keys.json
+          tag_name: ${{ github.ref_name }}
+          name: SnapForge ${{ github.ref_name }}
+          body: |
+            🎉 SnapForge ${{ github.ref_name }} Release
+            
+            ## What's New
+            - ✅ Cross-platform desktop application
+            - ✅ Production-grade license system
+            - ✅ Auto-updater integration
+            - ✅ Premium background removal features
+            - ✅ Professional image editing tools
+            
+            ## Download Instructions
+            1. Download the appropriate file for your operating system:
+               - **Windows**: `SnapForge-Setup.exe`
+               - **macOS**: `SnapForge.dmg`
+               - **Linux**: `SnapForge.AppImage`
+            
+            2. Install and run the application
+            
+            3. Use the provided license keys from the release assets to activate premium features
+            
+            ## Customer Ready
+            This release includes customer-ready packages with license keys for immediate deployment.
+            
+            🚀 Ready for business!
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
