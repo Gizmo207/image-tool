@@ -380,17 +380,27 @@ const handleFilter = async (filterType) => {
     
     setIsProcessing(true);
     try {
+      console.log('🚀 Starting background removal process...');
       const filteredDataUrl = await imageProcessor.filter(originalImage, 'remove-bg');
-      setProcessedImage(filteredDataUrl);
-      setProcessedFormat('png');
       
-      // Record usage for background removal specifically
-      if (window.usageLimiter) {
-        window.usageLimiter.recordUsage('background-removal', { filterType: 'remove-bg' });
+      // Check if the result is actually different from the original
+      if (filteredDataUrl && filteredDataUrl !== originalImage.src) {
+        setProcessedImage(filteredDataUrl);
+        setProcessedFormat('png');
+        
+        // Only record usage if background removal was successful
+        if (window.usageLimiter) {
+          window.usageLimiter.recordUsage('background-removal', { filterType: 'remove-bg' });
+        }
+        
+        console.log('✅ Background removal completed successfully');
+      } else {
+        console.warn('⚠️ Background removal returned unchanged image');
+        alert('Background removal failed or returned unchanged image. Please try with a different image.');
       }
     } catch (error) {
       console.error('Background removal failed:', error);
-      alert('Failed to remove background. Please try again.');
+      alert('Failed to remove background. Please try again with a different image.');
     } finally {
       setIsProcessing(false);
     }
@@ -403,6 +413,68 @@ const handleFilter = async (filterType) => {
           <h1 className="app-title">Image Editor</h1>
           <p className="app-subtitle">Professional Image Processing</p>
           {hasProLicense && <div className="pro-badge">PRO</div>}
+          
+          {/* Development Reset Button - More prominent */}
+          {window.location.hostname === 'localhost' && (
+            <>
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('🔄 Reset button clicked!');
+                  if (window.confirm('Reset everything back to first-time user experience?')) {
+                    console.log('🔄 User confirmed reset');
+                    
+                    // Reset trial data
+                    if (window.usageLimiter) {
+                      console.log('🔄 Resetting trial data...');
+                      window.usageLimiter.resetTrial();
+                    }
+                    
+                    // Reset first-run experience flag
+                    console.log('🔄 Clearing localStorage...');
+                    localStorage.removeItem('snapforge_first_run_complete');
+                    localStorage.removeItem('snapforge_license_data');
+                    localStorage.removeItem('install_date');
+                    
+                    console.log('🔄 Complete reset: All data cleared, reloading...');
+                    window.location.reload();
+                  } else {
+                    console.log('🔄 User cancelled reset');
+                  }
+                }}
+                style={{
+                  position: 'fixed',
+                  top: '10px',
+                  right: '10px',
+                  padding: '8px 12px',
+                  fontSize: '12px',
+                  background: '#ff4444',
+                  color: 'white',
+                  border: '2px solid #cc3333',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  opacity: '0.9',
+                  zIndex: 99999,
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                }}
+                title="Complete reset to first-time user experience (Dev only)"
+              >
+                🔄 DEV RESET
+              </button>
+              
+              {/* Console helper */}
+              {console.log('🔄 DEV RESET: To reset manually, run: window.devReset()')}
+              {window.devReset = () => {
+                if (window.usageLimiter) window.usageLimiter.resetTrial();
+                localStorage.removeItem('snapforge_first_run_complete');
+                localStorage.removeItem('snapforge_license_data');
+                localStorage.removeItem('install_date');
+                window.location.reload();
+              }}
+            </>
+          )}
         </header>
 
         <section className="upload-section">
@@ -543,10 +615,26 @@ const handleFilter = async (filterType) => {
               )}
               
               {lockedTools.resize?.locked && (
-                <div className="upgrade-prompt">
-                  <h4>🔒 Resize Tool Locked</h4>
-                  <p>You've used your free resize. Upgrade to Pro for unlimited resizing!</p>
-                  <button className="upgrade-btn">Unlock Unlimited Resizing</button>
+                <div className="compact-locked-notice" style={{
+                  padding: '8px 16px',
+                  marginTop: '8px'
+                }}>
+                  <button 
+                    className="mini-upgrade-btn" 
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      background: 'linear-gradient(45deg, #ff6b35, #f7931e)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    Unlock Pro
+                  </button>
                 </div>
               )}
             </div>
@@ -638,10 +726,26 @@ const handleFilter = async (filterType) => {
               )}
               
               {lockedTools.format?.locked && (
-                <div className="upgrade-prompt">
-                  <h4>🔒 Format Converter Locked</h4>
-                  <p>You've used your free conversion. Upgrade to Pro for unlimited conversions!</p>
-                  <button className="upgrade-btn">Unlock Unlimited Conversions</button>
+                <div className="compact-locked-notice" style={{
+                  padding: '8px 16px',
+                  marginTop: '8px'
+                }}>
+                  <button 
+                    className="mini-upgrade-btn" 
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      background: 'linear-gradient(45deg, #ff6b35, #f7931e)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    Unlock Pro
+                  </button>
                 </div>
               )}
             </div>
@@ -814,10 +918,26 @@ const handleFilter = async (filterType) => {
               )}
               
               {lockedTools.filters?.locked && (
-                <div className="upgrade-prompt">
-                  <h4>🔒 Filters Locked</h4>
-                  <p>You've used your free filter. Upgrade to Pro for unlimited filters!</p>
-                  <button className="upgrade-btn">Unlock All Premium Filters</button>
+                <div className="compact-locked-notice" style={{
+                  padding: '8px 16px',
+                  marginTop: '8px'
+                }}>
+                  <button 
+                    className="mini-upgrade-btn" 
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      background: 'linear-gradient(45deg, #ff6b35, #f7931e)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    Unlock Pro
+                  </button>
                 </div>
               )}
             </div>
@@ -849,15 +969,35 @@ const handleFilter = async (filterType) => {
               </div>
               
               {lockedTools.backgroundRemoval?.locked ? (
-                <div className="premium-upgrade-panel">
-                  <div className="upgrade-content">
-                    <div className="upgrade-icon">🚀</div>
-                    <h4>{lockedTools.backgroundRemoval.upgradePrompt?.title}</h4>
-                    <p>{lockedTools.backgroundRemoval.upgradePrompt?.message}</p>
-                    <button className="premium-upgrade-button">
-                      {lockedTools.backgroundRemoval.upgradePrompt?.cta || 'Unlock Pro Background Removal'}
-                    </button>
+                <div className="compact-locked-notice" style={{
+                  padding: '12px 16px',
+                  background: 'rgba(255, 193, 7, 0.1)',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 193, 7, 0.3)',
+                  marginTop: '8px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>�</span>
+                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)' }}>
+                      Trial exhausted - Upgrade for unlimited access
+                    </span>
                   </div>
+                  <button 
+                    className="mini-upgrade-btn" 
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      background: 'linear-gradient(45deg, #ff6b35, #f7931e)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    Unlock Pro
+                  </button>
                 </div>
               ) : expandedCards.backgroundRemoval && (
                 <div className="tool-content">
@@ -902,7 +1042,9 @@ const handleFilter = async (filterType) => {
                   <p>
                     {lockedTools.gifCreator?.locked 
                       ? lockedTools.gifCreator.upgradePrompt?.message || "Upgrade for unlimited GIF creation"
-                      : "Create animated GIFs from videos and image sequences"
+                      : expandedCards.gifCreator 
+                        ? "" 
+                        : "Create animated GIFs from videos and image sequences"
                     }
                   </p>
                 </div>
@@ -912,15 +1054,26 @@ const handleFilter = async (filterType) => {
               </div>
               
               {lockedTools.gifCreator?.locked ? (
-                <div className="premium-upgrade-panel">
-                  <div className="upgrade-content">
-                    <div className="upgrade-icon">🎬</div>
-                    <h4>{lockedTools.gifCreator.upgradePrompt?.title}</h4>
-                    <p>{lockedTools.gifCreator.upgradePrompt?.message}</p>
-                    <button className="premium-upgrade-button">
-                      {lockedTools.gifCreator.upgradePrompt?.cta || 'Unlock Unlimited GIF Creation'}
-                    </button>
-                  </div>
+                <div className="compact-locked-notice" style={{
+                  padding: '8px 16px',
+                  marginTop: '8px'
+                }}>
+                  <button 
+                    className="mini-upgrade-btn" 
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      background: 'linear-gradient(45deg, #ff6b35, #f7931e)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    Unlock Pro
+                  </button>
                 </div>
               ) : expandedCards.gifCreator && (
                 <div className="tool-content">

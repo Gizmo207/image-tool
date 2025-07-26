@@ -63,10 +63,10 @@ export const bestBackgroundRemover = {
             return result.processedImage;
 
         } catch (error) {
-            console.log('⚠️ Backend not available, using direct Python call...');
+            console.log('⚠️ Backend not available, using client-side processing...');
             
-            // Fallback: Use a direct approach with file system (limited but works)
-            return await this.callPythonDirectly(imageDataUrl);
+            // Fallback: Use client-side background removal
+            return await this.clientSideBackgroundRemoval(imageDataUrl);
         }
     },
 
@@ -114,6 +114,91 @@ Would you like to download the image for processing?`);
         } catch (error) {
             console.error('Direct Python call failed:', error);
             throw error;
+        }
+    },
+
+    /**
+     * Client-side background removal using canvas processing
+     * @param {string} imageDataUrl - Input image as data URL
+     * @returns {Promise<string>} - Result image as data URL
+     */
+    async clientSideBackgroundRemoval(imageDataUrl) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                // Draw the original image
+                ctx.drawImage(img, 0, 0);
+                
+                // Get image data
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                // Simple background removal algorithm
+                this.processImageForBackgroundRemoval(data, canvas.width, canvas.height);
+                
+                // Put the processed data back
+                ctx.putImageData(imageData, 0, 0);
+                
+                // Return as data URL
+                const result = canvas.toDataURL('image/png');
+                console.log('✅ Client-side background removal completed');
+                resolve(result);
+            };
+            img.src = imageDataUrl;
+        });
+    },
+
+    /**
+     * Process image data for background removal
+     * @param {Uint8ClampedArray} data - Image pixel data
+     * @param {number} width - Image width
+     * @param {number} height - Image height
+     */
+    processImageForBackgroundRemoval(data, width, height) {
+        // Simple algorithm: detect edges and make background transparent
+        const threshold = 40;
+        
+        // Sample corner pixels to get background color
+        const corners = [
+            { x: 0, y: 0 },
+            { x: width - 1, y: 0 },
+            { x: 0, y: height - 1 },
+            { x: width - 1, y: height - 1 }
+        ];
+        
+        let avgBgR = 0, avgBgG = 0, avgBgB = 0;
+        corners.forEach(corner => {
+            const index = (corner.y * width + corner.x) * 4;
+            avgBgR += data[index];
+            avgBgG += data[index + 1];
+            avgBgB += data[index + 2];
+        });
+        avgBgR /= corners.length;
+        avgBgG /= corners.length;
+        avgBgB /= corners.length;
+        
+        // Process each pixel
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            
+            // Calculate similarity to background
+            const colorDiff = Math.abs(r - avgBgR) + Math.abs(g - avgBgG) + Math.abs(b - avgBgB);
+            
+            if (colorDiff < threshold) {
+                // Make pixel transparent (background)
+                data[i + 3] = 0;
+            } else {
+                // Keep pixel opaque (foreground)
+                data[i + 3] = 255;
+            }
         }
     },
 

@@ -47,7 +47,13 @@ const GifCreatorInterface = ({ videoFile, originalImage, onGifCreated, onError, 
   };
   
   const createGif = async () => {
-    if (!videoFile || !videoInfo) return;
+    // Use videoFile if available, otherwise use original video from main canvas
+    const sourceVideoFile = videoFile || (originalImage?.isVideoPreview ? originalImage.originalVideoFile : null);
+    
+    if (!sourceVideoFile) {
+      alert('No video file available for GIF creation. Please upload a video file.');
+      return;
+    }
     
     setIsCreating(true);
     setProgress('Starting GIF creation...');
@@ -59,7 +65,7 @@ const GifCreatorInterface = ({ videoFile, originalImage, onGifCreated, onError, 
         duration: parseFloat(duration),
         fps: parseInt(fps),
         width: parseInt(width),
-        height: Math.round(width / videoInfo.aspectRatio),
+        height: Math.round(width / (videoInfo?.aspectRatio || originalImage?.width / originalImage?.height || 1)),
         quality: parseInt(quality)
       };
       
@@ -67,7 +73,7 @@ const GifCreatorInterface = ({ videoFile, originalImage, onGifCreated, onError, 
       setProgress('Capturing video frames...');
       setProgressPercent(20);
       
-      const gifDataUrl = await bulletproofGifCreator.createGifFromVideo(videoFile, options, (frameProgress) => {
+      const gifDataUrl = await bulletproofGifCreator.createGifFromVideo(sourceVideoFile, options, (frameProgress) => {
         // Frame capture progress (20% to 60%)
         const captureProgress = 20 + (frameProgress * 40);
         setProgressPercent(captureProgress);
@@ -285,8 +291,8 @@ const GifCreatorInterface = ({ videoFile, originalImage, onGifCreated, onError, 
       <div className="create-section">
         <button
           onClick={createGif}
-          disabled={isCreating || !videoFile}
-          className={`create-gif-button ${isCreating ? 'creating' : ''} ${!videoFile ? 'disabled' : ''}`}
+          disabled={isCreating || (!videoFile && !(originalImage?.isVideoPreview && originalImage?.originalVideoFile))}
+          className={`create-gif-button ${isCreating ? 'creating' : ''} ${(!videoFile && !(originalImage?.isVideoPreview && originalImage?.originalVideoFile)) ? 'disabled' : ''}`}
         >
           {isCreating ? 'Creating GIF...' : 'Create GIF'}
         </button>
