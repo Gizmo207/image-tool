@@ -129,7 +129,16 @@ const ImageCanvas = ({ originalImage, processedImage, isProcessing, processedFor
           <h3>📷 Original</h3>
           <div className="image-preview">
             {originalImage ? (
-              <img src={originalImage.src} alt="Original" />
+              originalImage.isVideoPreview && originalImage.originalVideoFile ? (
+                <video 
+                  src={URL.createObjectURL(originalImage.originalVideoFile)}
+                  controls
+                  style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '8px' }}
+                  alt="Original video"
+                />
+              ) : (
+                <img src={originalImage.src} alt="Original" />
+              )
             ) : (
               <div className="empty-state">
                 <p>Upload an image to get started</p>

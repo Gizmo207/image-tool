@@ -967,6 +967,7 @@ const handleFilter = async (filterType) => {
                     {/* Always show GIF Creator Interface */}
                     <GifCreatorInterface 
                       videoFile={videoFile}
+                      originalImage={originalImage}
                       onGifCreated={(gifDataUrl) => {
                         setProcessedImage(gifDataUrl);
                         setProcessedFormat('gif');
