@@ -57,7 +57,8 @@ function createWindow() {
     });
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadURL('http://localhost:3001');
+    // Production mode - load local index.html
+    mainWindow.loadFile('index.html');
   }
 
   // Show immediately - no waiting
