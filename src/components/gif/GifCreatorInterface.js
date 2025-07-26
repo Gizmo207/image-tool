@@ -297,11 +297,10 @@ const GifCreatorInterface = ({ videoFile, originalImage, onGifCreated, onError, 
           {isCreating ? 'Creating GIF...' : 'Create GIF'}
         </button>
         
-        {progress && (
-          <div className="progress-message">
-            {progress}
-          </div>
-        )}
+        {/* Always show progress area to prevent layout shift */}
+        <div className={`progress-message ${progress ? 'visible' : 'hidden'}`}>
+          {progress || '\u00A0'}{/* Non-breaking space when no message */}
+        </div>
       </div>
     </div>
   );

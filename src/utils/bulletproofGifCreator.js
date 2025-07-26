@@ -24,6 +24,9 @@ export const bulletproofGifCreator = {
     });
     
     return new Promise((resolve, reject) => {
+      // Cancellation flag to stop ongoing operations
+      let cancelled = false;
+      
       // Create video element
       const video = document.createElement('video');
       video.crossOrigin = 'anonymous';
@@ -36,11 +39,22 @@ export const bulletproofGifCreator = {
       canvas.width = width;
       canvas.height = height;
       
-      // Timeout protection
+      // Cleanup function
+      const cleanup = () => {
+        cancelled = true;
+        URL.revokeObjectURL(videoUrl);
+        video.removeAttribute('src');
+        video.load(); // This stops any ongoing video operations
+        clearTimeout(timeout);
+        console.log('🧹 GIF creation cleaned up');
+      };
+      
+      // Timeout protection - increased for larger videos
       const timeout = setTimeout(() => {
-        console.error('⏰ GIF creation timeout after 60 seconds');
+        console.error('⏰ GIF creation timeout after 120 seconds');
+        cleanup(); // Stop all operations immediately
         reject(new Error('GIF creation took too long. Try a shorter duration or smaller size.'));
-      }, 60000);
+      }, 120000); // Increased to 2 minutes
       
       // When video metadata is loaded
       video.onloadedmetadata = async () => {
@@ -70,6 +84,12 @@ export const bulletproofGifCreator = {
           let currentFrame = 0;
           
           const captureFrame = () => {
+            // Check if process was cancelled
+            if (cancelled) {
+              console.log('🚫 GIF creation cancelled, stopping frame capture');
+              return;
+            }
+            
             if (currentFrame >= frameCount) {
               console.log('📸 All frames captured, creating GIF...');
               console.log('Frame data lengths:', frames.map(f => f.length));
@@ -86,6 +106,12 @@ export const bulletproofGifCreator = {
             video.currentTime = frameTime;
             
             video.onseeked = () => {
+              // Check if process was cancelled before processing frame
+              if (cancelled) {
+                console.log('🚫 GIF creation cancelled, stopping frame processing');
+                return;
+              }
+              
               try {
                 // Draw video frame to canvas
                 ctx.drawImage(video, 0, 0, width, height);
@@ -102,8 +128,14 @@ export const bulletproofGifCreator = {
                 const frameProgress = currentFrame / frameCount;
                 progressCallback?.(frameProgress);
                 
-                // Small delay before next frame
-                setTimeout(captureFrame, 150);
+                // Small delay before next frame - but check cancellation first
+                setTimeout(() => {
+                  if (!cancelled) {
+                    captureFrame();
+                  } else {
+                    console.log('🚫 GIF creation cancelled, stopping frame sequence');
+                  }
+                }, 150);
                 
               } catch (error) {
                 console.error('❌ Frame capture error:', error);
@@ -113,17 +145,23 @@ export const bulletproofGifCreator = {
           };
           
           // Start capturing frames
-          setTimeout(captureFrame, 500);
+          setTimeout(() => {
+            if (!cancelled) {
+              captureFrame();
+            } else {
+              console.log('🚫 GIF creation cancelled before starting');
+            }
+          }, 500);
           
         } catch (error) {
-          clearTimeout(timeout);
+          cleanup();
           console.error('❌ Video processing error:', error);
           reject(error);
         }
       };
       
       video.onerror = (error) => {
-        clearTimeout(timeout);
+        cleanup();
         console.error('❌ Video loading error:', error);
         reject(new Error('Failed to load video file. Please check the format.'));
       };
@@ -132,14 +170,8 @@ export const bulletproofGifCreator = {
       const videoUrl = URL.createObjectURL(videoFile);
       video.src = videoUrl;
       
-      // Cleanup function
-      const cleanup = () => {
-        URL.revokeObjectURL(videoUrl);
-        clearTimeout(timeout);
-      };
-      
       // Auto cleanup after timeout
-      setTimeout(cleanup, 65000);
+      setTimeout(cleanup, 130000); // Cleanup 10 seconds after timeout
     });
     
     // Function to create GIF from captured frames
