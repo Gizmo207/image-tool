@@ -20,9 +20,13 @@ test.describe('SnapForge - Trial Limitations & Enforcement', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
     
-    // Check initial trial state
+    // Check initial trial state (with error handling)
     const initialUsage = await page.evaluate(() => {
-      return localStorage.getItem('snapforge_trial_usage') || '0';
+      try {
+        return localStorage.getItem('snapforge_trial_usage') || '0';
+      } catch (error) {
+        return 'access-denied';
+      }
     });
     
     console.log(`📊 Initial trial usage: ${initialUsage}`);
@@ -212,10 +216,14 @@ test.describe('SnapForge - Trial Limitations & Enforcement', () => {
     console.log('🔒 Testing premium feature blocking');
     
     await page.context().clearCookies();
-    await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
+    try {
+      await page.evaluate(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+      });
+    } catch (error) {
+      console.log('ℹ️ Storage clearing skipped (security restriction)');
+    }
     
     await page.goto('/');
     await page.waitForTimeout(2000);

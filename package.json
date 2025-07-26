@@ -33,6 +33,7 @@
     "test:specific": "playwright test tests/snapforge-full-test.spec.js",
     "test:gif": "playwright test tests/gif-creator-specific.spec.js",
     "test:utils": "playwright test tests/backend-utilities.spec.js",
+    "generate-license": "node generate-test-license.js",
     "generate-assets": "node generate-test-assets.js"
   },
   "keywords": [

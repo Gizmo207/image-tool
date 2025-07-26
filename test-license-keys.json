@@ -1,0 +1,18 @@
+{
+  "primaryKey": "IMG_PRO_g63kh7et94s_LIFETIME",
+  "allKeys": [
+    "IMG_PRO_g63kh7et94s_LIFETIME",
+    "IMG_PRO_xcvt4p8ygdb_LIFETIME",
+    "IMG_PRO_5y0os2fokhu_LIFETIME",
+    "IMG_PRO_nhqxj23cgb9_LIFETIME",
+    "IMG_PRO_tg2fehvx6s_LIFETIME"
+  ],
+  "generated": "2025-07-26T11:55:01.245Z",
+  "instructions": [
+    "1. Run: npm run electron-pro",
+    "2. Click: 🔐 I Have a License Key",
+    "3. Enter: IMG_PRO_g63kh7et94s_LIFETIME",
+    "4. Click: ✅ Activate License",
+    "5. Enjoy full premium features!"
+  ]
+}
