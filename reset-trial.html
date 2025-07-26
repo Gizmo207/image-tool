@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reset Trial Data</title>
+</head>
+<body>
+    <h1>Reset SnapForge Trial Data</h1>
+    <button onclick="resetTrial()">Reset Trial Data</button>
+    <div id="status"></div>
+
+    <script>
+        function resetTrial() {
+            try {
+                // Clear the usage data
+                localStorage.removeItem('snapforge_usage_data');
+                document.getElementById('status').innerHTML = '<p style="color: green;">✅ Trial data reset successfully! You can now use all tools again.</p>';
+                console.log('Trial data cleared from localStorage');
+            } catch (error) {
+                document.getElementById('status').innerHTML = '<p style="color: red;">❌ Error resetting trial data: ' + error.message + '</p>';
+                console.error('Error clearing trial data:', error);
+            }
+        }
+
+        // Show current status
+        window.onload = function() {
+            const stored = localStorage.getItem('snapforge_usage_data');
+            if (stored) {
+                try {
+                    const decoded = atob(stored);
+                    const data = JSON.parse(decoded);
+                    document.getElementById('status').innerHTML = '<p>Current usage data found. Click reset to clear it.</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } catch (e) {
+                    document.getElementById('status').innerHTML = '<p>Corrupted usage data found. Click reset to clear it.</p>';
+                }
+            } else {
+                document.getElementById('status').innerHTML = '<p>No usage data found. Trial should be fresh.</p>';
+            }
+        };
+    </script>
+</body>
+</html>

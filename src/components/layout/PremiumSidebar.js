@@ -925,56 +925,62 @@ const handleFilter = async (filterType) => {
               ) : expandedCards.gifCreator && (
                 <div className="tool-content">
                   <div className="gif-creator-section">
-                    <h4 style={{ color: '#40e0ff', fontSize: '14px', marginBottom: '10px' }}>
-                      🎬 GIF Creator - Upload Video
-                    </h4>
-                    <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.4', marginBottom: '15px' }}>
-                      <div style={{ marginBottom: '8px' }}>✅ Convert videos to optimized GIFs</div>
-                      <div style={{ marginBottom: '8px' }}>✅ Adjustable frame rate and quality</div>
-                      <div style={{ marginBottom: '8px' }}>✅ Custom duration and size settings</div>
-                      <div style={{ marginBottom: '8px' }}>✅ Smart compression algorithms</div>
+                    {/* For video upload to create GIF */}
+                    <div>
+                      <label className="video-upload-btn" style={{
+                        display: 'block',
+                        padding: '12px 16px',
+                        background: 'linear-gradient(45deg, #4285f4, #34a853)',
+                        color: 'white',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        border: 'none',
+                        marginBottom: '15px'
+                      }}>
+                        Choose Video File
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              // Check trial limits before proceeding
+                              if (window.usageLimiter) {
+                                const canUse = window.usageLimiter.canUseTool('gif-creator');
+                                if (!canUse.allowed) {
+                                  alert('Trial limit reached! You\'ve used your free GIF creation. Upgrade to Pro for unlimited GIF creation.');
+                                  e.target.value = ''; // Clear the input
+                                  return;
+                                }
+                              }
+                              setVideoFile(file);
+                            }
+                          }}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
                     </div>
                     
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          // Check trial limits before proceeding
-                          if (window.usageLimiter) {
-                            const canUse = window.usageLimiter.canUseTool('gif-creator');
-                            if (!canUse.allowed) {
-                              alert('Trial limit reached! You\'ve used your free GIF creation. Upgrade to Pro for unlimited GIF creation.');
-                              e.target.value = ''; // Clear the input
-                              return;
-                            }
-                          }
-                          setVideoFile(file);
+                    {/* Always show GIF Creator Interface */}
+                    <GifCreatorInterface 
+                      videoFile={videoFile}
+                      onGifCreated={(gifDataUrl) => {
+                        setProcessedImage(gifDataUrl);
+                        setProcessedFormat('gif');
+                        
+                        // Record usage for GIF creator
+                        if (window.usageLimiter) {
+                          window.usageLimiter.recordUsage('gif-creator', { source: 'video' });
                         }
                       }}
-                      style={{ marginBottom: '15px', width: '100%' }}
+                      onError={(error) => {
+                        console.error('GIF creation error:', error);
+                        alert('Failed to create GIF: ' + error);
+                      }}
                     />
-                    
-                    {videoFile && (
-                      <GifCreatorInterface 
-                        videoFile={videoFile}
-                        onGifCreated={(gifDataUrl) => {
-                          setProcessedImage(gifDataUrl);
-                          setProcessedFormat('gif');
-                          
-                          // Record usage for GIF creator
-                          if (window.usageLimiter) {
-                            window.usageLimiter.recordUsage('gif-creator', { source: 'video' });
-                          }
-                        }}
-                        onProgressUpdate={onGifProgressUpdate}
-                        onError={(error) => {
-                          console.error('GIF creation error:', error);
-                          alert('Failed to create GIF: ' + error);
-                        }}
-                      />
-                    )}
                   </div>
                 </div>
               )}
