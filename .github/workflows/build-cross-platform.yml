@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build'
+        required: false
+        default: 'manual'
 
 jobs:
   build:
@@ -15,21 +21,65 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Create missing assets directory
+        run: |
+          mkdir -p assets
+          mkdir -p build
+        shell: bash
+
+      - name: Create placeholder icons (if missing)
+        run: |
+          # Create a simple placeholder icon if assets don't exist
+          if [ ! -f "logo.png" ]; then
+            echo "Creating placeholder logo.png"
+            # You should replace this with actual icon creation or ensure icons exist
+            touch logo.png
+          fi
+          if [ ! -f "assets/icon.ico" ]; then
+            echo "Creating placeholder icon.ico"
+            touch assets/icon.ico
+          fi
+          if [ ! -f "assets/icon.icns" ]; then
+            echo "Creating placeholder icon.icns"
+            touch assets/icon.icns
+          fi
+          if [ ! -f "assets/icon.png" ]; then
+            echo "Creating placeholder icon.png"
+            touch assets/icon.png
+          fi
+        shell: bash
+
       - name: Generate License Keys for Customers
         run: node scripts/generate-test-license.js
 
-      - name: Build SnapForge
+      - name: Build Web Application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Verify build output
+        run: |
+          echo "Checking build output..."
+          ls -la dist/ || echo "No dist directory found"
+          ls -la build/ || echo "No build directory found"
+        shell: bash
+
+      - name: Build Electron App
         shell: bash
         run: |
+          echo "Building for ${{ matrix.os }}..."
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             npm run build:win
           elif [ "${{ matrix.os }}" == "macos-latest" ]; then
@@ -37,6 +87,16 @@ jobs:
           elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
             npm run build:linux
           fi
+        env:
+          NODE_ENV: production
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List build artifacts
+        run: |
+          echo "Build artifacts:"
+          ls -la dist-electron/ || echo "No dist-electron directory"
+          find dist-electron -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" 2>/dev/null || echo "No installers found"
+        shell: bash
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4

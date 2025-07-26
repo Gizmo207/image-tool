@@ -13,6 +13,30 @@ const path = require('path');
 
 console.log('🚀 Building SnapForge for cross-platform distribution...\n');
 
+// Check if required files exist
+function checkRequiredFiles() {
+  const requiredFiles = [
+    'electron-simple.js',
+    'licenseManager.js',
+    'preload.js'
+  ];
+  
+  const missingFiles = requiredFiles.filter(file => !fs.existsSync(path.join(__dirname, '..', file)));
+  
+  if (missingFiles.length > 0) {
+    console.warn('⚠️  Missing required files:', missingFiles);
+  }
+  
+  // Check for build output
+  const buildPaths = ['dist', 'build'];
+  const buildExists = buildPaths.some(buildPath => fs.existsSync(path.join(__dirname, '..', buildPath)));
+  
+  if (!buildExists) {
+    console.error('❌ No build output found! Please run "npm run build" first.');
+    process.exit(1);
+  }
+}
+
 const commonConfig = {
   appId: 'com.snapforge.imageEditor',
   productName: 'SnapForge',
@@ -25,7 +49,10 @@ const commonConfig = {
     'licenseManager.js',
     'preload.js',
     'dist/**/*',
-    'assets/**/*',
+    'build/**/*',
+    'src/**/*',
+    'public/**/*',
+    'package.json',
     '!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}',
     '!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}',
     '!**/node_modules/*.d.ts',
@@ -54,7 +81,7 @@ const platforms = {
           arch: ['x64']
         }
       ],
-      icon: 'assets/icon.ico'
+      icon: fs.existsSync(path.join(__dirname, '..', 'assets', 'icon.ico')) ? 'assets/icon.ico' : 'logo.png'
     },
     nsis: {
       oneClick: false,
@@ -73,7 +100,7 @@ const platforms = {
           arch: ['x64', 'arm64']
         }
       ],
-      icon: 'assets/icon.icns',
+      icon: fs.existsSync(path.join(__dirname, '..', 'assets', 'icon.icns')) ? 'assets/icon.icns' : undefined,
       category: 'public.app-category.graphics-design'
     },
     dmg: {
@@ -103,7 +130,7 @@ const platforms = {
           arch: ['x64']
         }
       ],
-      icon: 'assets/icon.png',
+      icon: fs.existsSync(path.join(__dirname, '..', 'assets', 'icon.png')) ? 'assets/icon.png' : 'logo.png',
       category: 'Graphics'
     }
   }
@@ -112,14 +139,39 @@ const platforms = {
 async function buildForPlatform(platform) {
   console.log(`🔨 Building for ${platform}...`);
   
+  // Check required files before building
+  checkRequiredFiles();
+  
   try {
+    console.log(`📋 Build configuration for ${platform}:`);
+    console.log(JSON.stringify(platforms[platform], null, 2));
+    
     await build({
       config: platforms[platform]
     });
     
     console.log(`✅ ${platform} build completed successfully!`);
+    
+    // List generated files
+    const distPath = path.join(__dirname, '..', 'dist-electron');
+    if (fs.existsSync(distPath)) {
+      const files = fs.readdirSync(distPath);
+      console.log(`📦 Generated files for ${platform}:`);
+      files.forEach(file => {
+        const filePath = path.join(distPath, file);
+        const stats = fs.statSync(filePath);
+        if (stats.isFile()) {
+          const sizeInMB = (stats.size / (1024 * 1024)).toFixed(2);
+          console.log(`   - ${file} (${sizeInMB} MB)`);
+        }
+      });
+    }
   } catch (error) {
-    console.error(`❌ ${platform} build failed:`, error);
+    console.error(`❌ ${platform} build failed:`);
+    console.error('Error details:', error.message);
+    if (error.stack) {
+      console.error('Stack trace:', error.stack);
+    }
     throw error;
   }
 }

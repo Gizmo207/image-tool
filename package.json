@@ -70,25 +70,32 @@
     "wait-on": "^8.0.4"
   },
   "build": {
-    "appId": "com.snapforge.app",
+    "appId": "com.snapforge.imageEditor",
     "productName": "SnapForge",
     "directories": {
       "output": "dist-electron"
     },
     "files": [
+      "electron-simple.js",
+      "licenseManager.js",
+      "preload.js",
+      "dist/**/*",
       "build/**/*",
+      "src/**/*",
+      "public/**/*",
       "u2net/*.py",
       "server.js",
       "electron-pro.js",
       "package.json",
       "logo.png",
-      "src/services/**/*",
-      "src/components/**/*",
       "firebase-tools-config.json",
       "!node_modules/**/*",
       "!u2net/*.pth",
       "!u2net/__pycache__/**/*",
-      "!dist-electron/**/*"
+      "!dist-electron/**/*",
+      "!.git/**/*",
+      "!tests/**/*",
+      "!scripts/**/*"
     ],
     "extraResources": [
       {
