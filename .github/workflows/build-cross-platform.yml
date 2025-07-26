@@ -18,12 +18,12 @@ jobs:
         os: [windows-latest, macos-latest, ubuntu-latest]
         include:
           - os: windows-latest
-            platform: win32
+            platform: win
             arch: x64
             ext: .exe
             artifact: SnapForge-Setup.exe
           - os: macos-latest
-            platform: darwin
+            platform: mac
             arch: x64
             ext: .dmg
             artifact: SnapForge.dmg
@@ -49,7 +49,7 @@ jobs:
       run: npm ci
 
     - name: Generate License Keys for Customers
-      run: node generate-test-license.js
+      run: node scripts/generate-test-license.js
 
     - name: Build Electron App
       run: npm run build:${{ matrix.platform }}
@@ -62,13 +62,13 @@ jobs:
         mkdir -p customer-package
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           cp dist-electron/*.exe customer-package/ || true
-          cp test-license-keys.json customer-package/license-keys.json
+          cp config/test-license-keys.json customer-package/license-keys.json
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           cp dist-electron/*.dmg customer-package/ || true
-          cp test-license-keys.json customer-package/license-keys.json
+          cp config/test-license-keys.json customer-package/license-keys.json
         else
           cp dist-electron/*.AppImage customer-package/ || true
-          cp test-license-keys.json customer-package/license-keys.json
+          cp config/test-license-keys.json customer-package/license-keys.json
         fi
 
     - name: Upload Customer Package
@@ -82,10 +82,10 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          dist-electron/*.exe
-          dist-electron/*.dmg
-          dist-electron/*.AppImage
-          test-license-keys.json
+          dist-electron/**/*.exe
+          dist-electron/**/*.dmg
+          dist-electron/**/*.AppImage
+          config/test-license-keys.json
         tag_name: ${{ github.ref_name }}
         name: SnapForge ${{ github.ref_name }}
         body: |
@@ -106,7 +106,7 @@ jobs:
           
           2. Install and run the application
           
-          3. Use the provided license keys from `test-license-keys.json` to activate premium features
+          3. Use the provided license keys from `config/test-license-keys.json` to activate premium features
           
           ## Customer Ready
           This release includes customer-ready packages with license keys for immediate deployment.

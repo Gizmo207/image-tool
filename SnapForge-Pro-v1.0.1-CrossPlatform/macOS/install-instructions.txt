@@ -1,0 +1,31 @@
+# SnapForge Pro v1.0.1 - macOS Installation
+
+## Quick Start
+1. Double-click `SnapForge-1.0.1-macOS.dmg` to mount the disk image
+2. Drag SnapForge to your Applications folder
+3. Launch SnapForge from Applications or Launchpad
+4. Use a license key from `LICENSE_KEYS.txt` to unlock premium features
+
+## System Requirements
+- macOS 10.15 (Catalina) or later
+- Intel or Apple Silicon Mac
+- 4GB RAM minimum, 8GB recommended
+- 500MB free disk space
+- Internet connection for license activation
+
+## First Launch
+- If macOS blocks the app, go to System Preferences > Security & Privacy
+- Click "Open Anyway" to allow SnapForge to run
+- This is normal for apps not distributed through the Mac App Store
+
+## Premium Features
+- Advanced AI background removal
+- Batch processing
+- Professional export formats
+- Priority support
+
+## Troubleshooting
+- If the app won't open, try right-clicking and selecting "Open"
+- Contact support: support@snapforge.com
+
+Enjoy your professional image editing experience! 🎨

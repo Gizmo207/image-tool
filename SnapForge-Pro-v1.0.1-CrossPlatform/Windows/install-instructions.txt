@@ -1,0 +1,26 @@
+# SnapForge Pro v1.0.1 - Windows Installation
+
+## Quick Start
+1. Double-click `SnapForge-1.0.1-Windows.exe` to install
+2. Follow the installation wizard
+3. Launch SnapForge from your desktop or Start menu
+4. Use a license key from `LICENSE_KEYS.txt` to unlock premium features
+
+## System Requirements
+- Windows 10 or later (64-bit)
+- 4GB RAM minimum, 8GB recommended
+- 500MB free disk space
+- Internet connection for license activation
+
+## Premium Features
+- Advanced AI background removal
+- Batch processing
+- Professional export formats
+- Priority support
+
+## Troubleshooting
+- If Windows Defender blocks the installer, click "More info" then "Run anyway"
+- Run as Administrator if installation fails
+- Contact support: support@snapforge.com
+
+Enjoy your professional image editing experience! 🎨

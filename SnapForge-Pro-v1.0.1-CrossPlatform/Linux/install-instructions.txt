@@ -1,0 +1,38 @@
+# SnapForge Pro v1.0.1 - Linux Installation
+
+## Quick Start
+1. Make `SnapForge-1.0.1-Linux.AppImage` executable: `chmod +x SnapForge-1.0.1-Linux.AppImage`
+2. Double-click the AppImage file or run from terminal: `./SnapForge-1.0.1-Linux.AppImage`
+3. Use a license key from `LICENSE_KEYS.txt` to unlock premium features
+
+## System Requirements
+- Linux x64 (Ubuntu 18.04+, Fedora 28+, or equivalent)
+- 4GB RAM minimum, 8GB recommended
+- 500MB free disk space
+- Internet connection for license activation
+
+## Installation Options
+**Option 1: Portable (Recommended)**
+- No installation required, just run the AppImage
+
+**Option 2: System Integration**
+```bash
+# Make executable
+chmod +x SnapForge-1.0.1-Linux.AppImage
+
+# Optional: Install AppImageLauncher for desktop integration
+sudo apt install appimagelauncher
+```
+
+## Premium Features
+- Advanced AI background removal
+- Batch processing
+- Professional export formats
+- Priority support
+
+## Troubleshooting
+- If AppImage won't run, install FUSE: `sudo apt install fuse`
+- For permission issues, ensure execute permissions: `chmod +x SnapForge-1.0.1-Linux.AppImage`
+- Contact support: support@snapforge.com
+
+Enjoy your professional image editing experience! 🎨
