@@ -1,6 +1,7 @@
 {
   "name": "snapforge",
   "version": "1.0.0",
+  "type": "module",
   "description": "SnapForge - Professional image editing desktop app with AI background removal",
   "main": "electron-pro.js",
   "homepage": "./",
@@ -14,7 +15,25 @@
     "build-electron": "npm run build && electron-builder",
     "dist-pro": "npm run build && electron-builder --publish=never",
     "pack": "npm run build && electron-builder --dir",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test-runner.js",
+    "test:gauntlet": "node test-runner.js",
+    "test:quick": "node test-runner.js --quick",
+    "test:license": "node test-runner.js --license",
+    "test:checkout": "node test-runner.js --checkout",
+    "test:trial": "node test-runner.js --trial",
+    "test:first": "node test-runner.js --first",
+    "test:playwright": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:chrome": "playwright test --project=chrome",
+    "test:firefox": "playwright test --project=firefox",
+    "test:safari": "playwright test --project=safari",
+    "test:specific": "playwright test tests/snapforge-full-test.spec.js",
+    "test:gif": "playwright test tests/gif-creator-specific.spec.js",
+    "test:utils": "playwright test tests/backend-utilities.spec.js",
+    "generate-assets": "node generate-test-assets.js"
   },
   "keywords": [
     "image-editor",
@@ -36,10 +55,12 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.1",
     "@vitejs/plugin-react": "^4.7.0",
     "concurrently": "^9.2.0",
     "electron": "^37.2.4",
     "electron-builder": "^26.0.12",
+    "playwright": "^1.54.1",
     "vite": "^7.0.6",
     "wait-on": "^8.0.4"
   },
@@ -52,7 +73,7 @@
     "files": [
       "build/**/*",
       "u2net/*.py",
-      "server.js", 
+      "server.js",
       "electron-pro.js",
       "package.json",
       "logo.png",
